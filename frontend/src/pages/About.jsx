@@ -3,25 +3,6 @@ import React, { useEffect } from "react";
 import { DollarSign, Shield, Clock } from "lucide-react";
 
 const About = () => {
-  useEffect(() => {
-    // Create the custom cursor
-    const cursor = document.createElement("div");
-    cursor.id = "custom-cursor";
-    document.body.appendChild(cursor);
-
-    const moveCursor = (e) => {
-      cursor.style.top = `${e.clientY}px`;
-      cursor.style.left = `${e.clientX}px`;
-    };
-
-    document.addEventListener("mousemove", moveCursor);
-
-    // Cleanup function
-    return () => {
-      document.removeEventListener("mousemove", moveCursor);
-      document.body.removeChild(cursor);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
@@ -132,11 +113,11 @@ const About = () => {
           transform: scale(1.5); /* Makes the cursor grow over buttons */
         }
 
-        body,
+        /* body,
         a,
         button {
           cursor: none;
-        }
+        } */
       `}</style>
     </div>
   );

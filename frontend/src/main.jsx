@@ -8,9 +8,7 @@ const rootElement = document.getElementById('root');
 const root = ReactDOM.createRoot(rootElement);
 
 root.render(
-  <WalletProvider>
     <React.StrictMode>
       <App />
     </React.StrictMode>
-  </WalletProvider>
 );

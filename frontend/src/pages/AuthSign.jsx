@@ -66,23 +66,6 @@ const AuthSign = () => {
     localStorage.removeItem("walletAddress");
   };
 
-  useEffect(() => {
-    const cursor = document.createElement("div");
-    cursor.id = "custom-cursor";
-    document.body.appendChild(cursor);
-
-    const moveCursor = (e) => {
-      cursor.style.top = `${e.clientY}px`;
-      cursor.style.left = `${e.clientX}px`;
-    };
-
-    document.addEventListener("mousemove", moveCursor);
-
-    return () => {
-      document.removeEventListener("mousemove", moveCursor);
-      document.body.removeChild(cursor);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen w-full bg-black">

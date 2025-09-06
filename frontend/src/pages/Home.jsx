@@ -10,11 +10,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import GeometricWeb from "../components/GeometricWeb";
-import { ethers } from "ethers";
+import { useAccount } from 'wagmi';
 
 const Home = () => {
-  const [account, setAccount] = useState(null);
-  const [contract, setContract] = useState(null);
+  const { address, isConnected, chain } = useAccount();
 
   // Replace with your deployed contract's ABI and address
   const contractABI = [
@@ -369,46 +368,12 @@ const Home = () => {
   ];
   const contractAddress = "0x34AB0985306d52e6aC44597bed8078ec2f69BE30";
 
-  useEffect(() => {
-    const cursor = document.createElement("div");
-    cursor.id = "custom-cursor";
-    document.body.appendChild(cursor);
-
-    const moveCursor = (e) => {
-      cursor.style.top = `${e.clientY}px`;
-      cursor.style.left = `${e.clientX}px`;
-    };
-
-    document.addEventListener("mousemove", moveCursor);
-
-    return () => {
-      document.removeEventListener("mousemove", moveCursor);
-      document.body.removeChild(cursor);
-    };
-  }, []);
-
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
-      setAccount(accounts[0]);
-
-      const signer = await provider.getSigner();
-      const contractInstance = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        signer
-      );
-      setContract(contractInstance);
-    } else {
-      alert("Please install MetaMask to connect to the wallet.");
-    }
-  };
-
   const fetchLoanDetails = async () => {
-    if (contract) {
+    if (isConnected && address) {
       try {
-        const loanDetails = await contract.getLoanDetails();
+        const { ethers } = await import('ethers');
+        const contract = new ethers.Contract(contractAddress, contractABI[0], provider);
+        const loanDetails = await contract.loanCounter(); // Example call
         console.log("Loan Details:", loanDetails);
       } catch (error) {
         console.error("Error fetching loan details:", error);
@@ -422,7 +387,7 @@ const Home = () => {
       <header className="container mx-auto px-6 py-16">
         <GeometricWeb />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between animate-scale-up">
+        <div className="relative flex flex-col md:flex-row items-center justify-between animate-scale-up">
           <div className="md:w-1/2 mb-10 md:mb-0 pl-14">
             <h1 className="text-5xl font-bold mb-6">
               Decentralized <span className="text-violet-400">Microloans</span>{" "}
@@ -459,7 +424,7 @@ const Home = () => {
       </header>
 
       {/* Loan Details Button */}
-      {account && (
+      {address && (
         <div className="container mx-auto px-6 py-8 text-center">
           <button
             onClick={fetchLoanDetails}
@@ -471,7 +436,7 @@ const Home = () => {
       )}
 
       {/* Features Section */}
-      <section className="relative z-10 bg-black/50 py-20 lg:p-10 animate-slide-up">
+      <section className="relative bg-black/50 py-20 lg:p-10 animate-slide-up">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-12 text-center">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -515,7 +480,7 @@ const Home = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="relative z-10 bg-black py-20 lg:p-10 animate-slide-up">
+      <section className="relative bg-black py-20 lg:p-10 animate-slide-up">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-12 text-center">Benefits</h2>
           <div className="grid md:grid-cols-2 gap-14">
@@ -592,7 +557,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20 bg-black bg-violet-400/10 animate-slide-up">
+      <section className="relative py-20 bg-black bg-violet-400/10 animate-slide-up">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
@@ -608,7 +573,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t bg-black border-violet-400/20 py-8 animate-slide-up">
+      <footer className="relative border-t bg-black border-violet-400/20 py-8 animate-slide-up">
         <div className="container mx-auto px-6 flex justify-between items-center">
           <div className="text-xl font-bold text-violet-400">FlashDAG</div>
           <div className="flex gap-6 text-sm text-gray-400">
@@ -670,18 +635,6 @@ const Home = () => {
 
         .animate-slide-up {
           animation: slide-up 1s ease-out forwards;
-        }
-
-        #custom-cursor {
-          position: fixed;
-          width: 20px;
-          height: 20px;
-          background-color: #32ff7e;
-          border-radius: 50%;
-          pointer-events: none;
-          transform: translate(-50%, -50%);
-          z-index: 9999;
-          transition: transform 0.1s ease;
         }
       `}</style>
     </div>
