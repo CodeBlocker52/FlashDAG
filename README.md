@@ -355,8 +355,8 @@ graph LR
 
 ## 🌐 Deployment
 Deployed Contracts on Premodial Testnet :
-MicroLendingPlatform : (0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41)[https://primordial.bdagscan.com/contractOverview/0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41?chain=EVM]
-BDAGToken : (0x420070D88992e39c36B48c757e9ac1E9070f525d)[https://primordial.bdagscan.com/contractOverview/0x420070D88992e39c36B48c757e9ac1E9070f525d?chain=EVM]
+MicroLendingPlatform : 0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41 [https://primordial.bdagscan.com/contractOverview/0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41?chain=EVM]
+BDAGToken : 0x420070D88992e39c36B48c757e9ac1E9070f525d [https://primordial.bdagscan.com/contractOverview/0x420070D88992e39c36B48c757e9ac1E9070f525d?chain=EVM]
 
 ### Local Deployment
 
