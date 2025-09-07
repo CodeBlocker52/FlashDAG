@@ -44,7 +44,7 @@ const Dashboard = () => {
       interest: "7.2",
       duration: "30 days",
       collateralAmount: "38.25",
-      collateralType: "ETH",
+      collateralType: "BDAG",
       status: "ACTIVE",
       role: "Borrower",
       dueDate: "2024-02-15",
@@ -68,7 +68,7 @@ const Dashboard = () => {
       interest: "9.1",
       duration: "14 days",
       collateralAmount: "19.12",
-      collateralType: "ETH",
+      collateralType: "BDAG",
       status: "PENDING",
       role: "Borrower",
       dueDate: "2024-02-08",
@@ -80,7 +80,7 @@ const Dashboard = () => {
       interest: "5.9",
       duration: "60 days",
       collateralAmount: "150.0",
-      collateralType: "ETH",
+      collateralType: "BDAG",
       status: "DEFAULTED",
       role: "Lender",
       dueDate: "2024-01-20",
@@ -194,7 +194,7 @@ const Dashboard = () => {
                   <DollarSign className="w-4 h-4 text-violet-400" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{dashboardData.totalValueLocked} ETH</div>
+                  <div className="text-2xl font-bold text-white">{dashboardData.totalValueLocked} BDAG</div>
                   <div className="flex items-center text-sm text-green-400">
                     <TrendingUp className="w-4 h-4 mr-1" />
                     +24.1% from last month
@@ -227,8 +227,8 @@ const Dashboard = () => {
                   <CardTitle className="text-violet-300 text-sm">Total Borrowed</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{userMetrics.totalBorrowed} ETH</div>
-                  <div className="text-sm text-gray-400">Active: {userMetrics.activeBorrowedAmount} ETH</div>
+                  <div className="text-2xl font-bold text-white">{userMetrics.totalBorrowed} BDAG</div>
+                  <div className="text-sm text-gray-400">Active: {userMetrics.activeBorrowedAmount} BDAG</div>
                 </CardContent>
               </Card>
 
@@ -237,8 +237,8 @@ const Dashboard = () => {
                   <CardTitle className="text-green-300 text-sm">Total Lent</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{userMetrics.totalLent} ETH</div>
-                  <div className="text-sm text-gray-400">Active: {userMetrics.activeLentAmount} ETH</div>
+                  <div className="text-2xl font-bold text-white">{userMetrics.totalLent} BDAG</div>
+                  <div className="text-sm text-gray-400">Active: {userMetrics.activeLentAmount} BDAG</div>
                 </CardContent>
               </Card>
 
@@ -247,7 +247,7 @@ const Dashboard = () => {
                   <CardTitle className="text-blue-300 text-sm">Total Collateral</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-white">{userMetrics.totalCollateral} ETH</div>
+                  <div className="text-2xl font-bold text-white">{userMetrics.totalCollateral} BDAG</div>
                   <div className="text-sm text-gray-400">Locked & Available</div>
                 </CardContent>
               </Card>
@@ -295,7 +295,7 @@ const Dashboard = () => {
                       className="border-b border-violet-400/10 hover:bg-violet-900/10 transition-colors duration-200"
                     >
                       <td className="p-3 text-white font-mono text-sm">{loan.id}</td>
-                      <td className="p-3 text-white font-semibold">{loan.amount} ETH</td>
+                      <td className="p-3 text-white font-semibold">{loan.amount} BDAG</td>
                       <td className="p-3 text-white">{loan.interest}%</td>
                       <td className="p-3 text-gray-300">{loan.duration}</td>
                       <td className="p-3 text-white">
@@ -350,7 +350,7 @@ const Dashboard = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Total Returns</span>
-                  <span className="text-green-400 font-bold">+47.23 ETH</span>
+                  <span className="text-green-400 font-bold">+47.23 BDAG</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Average APY</span>
@@ -370,7 +370,7 @@ const Dashboard = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Total Interest Paid</span>
-                  <span className="text-red-400 font-bold">-8.47 ETH</span>
+                  <span className="text-red-400 font-bold">-8.47 BDAG</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Average Rate</span>

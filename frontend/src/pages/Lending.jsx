@@ -18,9 +18,20 @@ import {
   Star,
   Award,
 } from "lucide-react";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount, useBalance, useReadContract } from "wagmi";
+import { formatEther, parseEther } from "viem";
+import {
+  useMicroLendingPlatform,
+  useBDAGToken,
+  calculateLoanReturn,
+  formatLoanStatus,
+} from "../hooks/useContracts";
 
-// Custom Card Components
+// Contract addresses - Replace with actual deployed addresses
+const MICRO_LENDING_PLATFORM_ADDRESS = "0x..."; // Your contract address
+const BDAG_TOKEN_ADDRESS = "0x..."; // Your BDAG token address
+
+// Custom Card Components (same as before)
 const Card = ({ className, children, onClick }) => (
   <div
     className={`rounded-xl shadow-lg overflow-hidden backdrop-blur-sm transition-all duration-300 ${className}`}
@@ -42,7 +53,6 @@ const CardContent = ({ children, className }) => (
   <div className={`p-6 ${className}`}>{children}</div>
 );
 
-// Custom Alert Component
 const Alert = ({ children, className, variant = "info" }) => {
   const variants = {
     info: "bg-blue-900/30 border-blue-400/30 text-blue-300",
@@ -60,8 +70,30 @@ const Alert = ({ children, className, variant = "info" }) => {
 
 const SupplyDashboard = () => {
   const { address, isConnected } = useAccount();
-  const { data: balance } = useBalance({ address });
+  const { data: nativeBalance } = useBalance({ address });
 
+  // Contract hooks
+  const {
+    fundLoan,
+    loanCounter,
+    platformStats,
+    lenderInfo,
+    isPending: isFundingPending,
+    isConfirming: isFundingConfirming,
+    isConfirmed: isFundingConfirmed,
+    error: fundingError,
+  } = useMicroLendingPlatform();
+
+  const {
+    balance: bdagBalance,
+    allowance,
+    approve,
+    isPending: isApprovePending,
+    isConfirming: isApproveConfirming,
+    isConfirmed: isApproveConfirmed,
+  } = useBDAGToken();
+
+  // Component state
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [status, setStatus] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -69,139 +101,133 @@ const SupplyDashboard = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searchTerm, setSearchTerm] = useState("");
   const [showDetails, setShowDetails] = useState({});
+  const [loans, setLoans] = useState([]);
+  const [loadingLoans, setLoadingLoans] = useState(false);
 
-  // Enhanced mock borrow requests data
-  const borrowRequests = [
+  // Fetch all pending loans
+  const { data: allLoansData, refetch: refetchLoans } = useReadContract({
+    address: MICRO_LENDING_PLATFORM_ADDRESS,
+    abi: [
+      {
+        type: "function",
+        name: "loans",
+        inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+        outputs: [
+          { name: "borrower", type: "address", internalType: "address" },
+          { name: "lender", type: "address", internalType: "address" },
+          { name: "amount", type: "uint256", internalType: "uint256" },
+          { name: "interestRate", type: "uint256", internalType: "uint256" },
+          { name: "duration", type: "uint256", internalType: "uint256" },
+          { name: "startTime", type: "uint256", internalType: "uint256" },
+          {
+            name: "collateralAmount",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "status",
+            type: "uint8",
+            internalType: "enum MicroLendingPlatform.LoanStatus",
+          },
+          { name: "repaidAmount", type: "uint256", internalType: "uint256" },
+          { name: "isPartiallyRepaid", type: "bool", internalType: "bool" },
+          { name: "purpose", type: "string", internalType: "string" },
+        ],
+        stateMutability: "view",
+      },
+    ],
+    functionName: "loans",
+    args: [1], // This would need to be called for each loan ID
+    enabled: !!loanCounter && loanCounter > 0,
+  });
+
+  // Effect to handle transaction confirmations
+  useEffect(() => {
+    if (isFundingConfirmed) {
+      setStatus("✅ Loan funded successfully!");
+      setSelectedRequest(null);
+      setProcessing(false);
+      refetchLoans();
+      // Refetch user data
+    } else if (fundingError) {
+      setStatus(`❌ Error funding loan: ${fundingError.message}`);
+      setProcessing(false);
+    }
+  }, [isFundingConfirmed, fundingError, refetchLoans]);
+
+  useEffect(() => {
+    if (isApproveConfirmed) {
+      setStatus("✅ BDAG approval successful! You can now fund loans.");
+    }
+  }, [isApproveConfirmed]);
+
+  // Fetch loan details for all loan IDs
+  useEffect(() => {
+    const fetchAllLoans = async () => {
+      if (!loanCounter || loanCounter === 0) return;
+
+      setLoadingLoans(true);
+      try {
+        // In a real implementation, you'd use multicall or batch requests
+        const loanPromises = [];
+        for (let i = 1; i <= loanCounter; i++) {
+          // You'd need to make individual contract calls here
+          // This is a simplified example
+        }
+
+        // For now, using mock data - replace with actual contract data
+        setLoans(mockBorrowRequests);
+      } catch (error) {
+        console.error("Error fetching loans:", error);
+        setStatus("❌ Error fetching loan data");
+      } finally {
+        setLoadingLoans(false);
+      }
+    };
+
+    fetchAllLoans();
+  }, [loanCounter]);
+
+  // Mock data for development - replace with contract data
+  const mockBorrowRequests = [
     {
       id: 1,
       borrower: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
       loanAmount: 2.5,
       collateralAmount: 4.0,
-      collateralType: "ETH",
+      collateralType: "BDAG",
       duration: 30,
       interestRate: 6.8,
       timestamp: "2024-01-15",
-      riskScore: 85,
-      creditScore: 742,
-      previousLoans: 12,
-      repaymentHistory: "98%",
       purpose: "DeFi Farming",
-      status: "pending",
+      status: 0, // 0 = Requested
       collateralRatio: 160,
-      estimatedReturn: 0.14,
     },
     {
       id: 2,
       borrower: "0x932d35Cc6634C0532925a3b844Bc454e4438f55f",
       loanAmount: 1.8,
       collateralAmount: 2.88,
-      collateralType: "WBTC",
+      collateralType: "BDAG",
       duration: 15,
       interestRate: 5.2,
       timestamp: "2024-01-14",
-      riskScore: 92,
-      creditScore: 815,
-      previousLoans: 28,
-      repaymentHistory: "100%",
       purpose: "Arbitrage Trading",
-      status: "pending",
+      status: 0, // 0 = Requested
       collateralRatio: 160,
-      estimatedReturn: 0.065,
-    },
-    {
-      id: 3,
-      borrower: "0x542d35Cc6634C0532925a3b844Bc454e4438f66e",
-      loanAmount: 5.0,
-      collateralAmount: 8.5,
-      collateralType: "ETH",
-      duration: 60,
-      interestRate: 7.5,
-      timestamp: "2024-01-13",
-      riskScore: 76,
-      creditScore: 680,
-      previousLoans: 5,
-      repaymentHistory: "80%",
-      purpose: "Liquidity Mining",
-      status: "pending",
-      collateralRatio: 170,
-      estimatedReturn: 0.62,
-    },
-    {
-      id: 4,
-      borrower: "0x123d35Cc6634C0532925a3b844Bc454e4438f77g",
-      loanAmount: 0.8,
-      collateralAmount: 1.28,
-      collateralType: "ETH",
-      duration: 7,
-      interestRate: 4.5,
-      timestamp: "2024-01-12",
-      riskScore: 95,
-      creditScore: 890,
-      previousLoans: 45,
-      repaymentHistory: "100%",
-      purpose: "Short-term Liquidity",
-      status: "pending",
-      collateralRatio: 160,
-      estimatedReturn: 0.007,
     },
   ];
 
-  const [filteredRequests, setFilteredRequests] = useState(borrowRequests);
-
-  // Portfolio summary data
-  const portfolioData = {
-    totalSupplied: "12.45 ETH",
-    activeLoans: 8,
-    totalEarnings: "1.87 ETH",
-    averageAPY: "8.4%",
-    pendingReturns: "0.42 ETH",
-    riskScore: "Low-Medium",
-  };
-
-  useEffect(() => {
-    let filtered = borrowRequests;
-
-    // Apply filters
-    if (filterBy !== "all") {
-      filtered = filtered.filter((req) => {
-        switch (filterBy) {
-          case "high-yield":
-            return req.interestRate >= 6;
-          case "low-risk":
-            return req.riskScore >= 85;
-          case "short-term":
-            return req.duration <= 30;
-          default:
-            return true;
-        }
-      });
-    }
-
-    // Apply search
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (req) =>
-          req.borrower.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          req.purpose.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "highest-rate":
-          return b.interestRate - a.interestRate;
-        case "lowest-risk":
-          return b.riskScore - a.riskScore;
-        case "amount":
-          return b.loanAmount - a.loanAmount;
-        default:
-          return new Date(b.timestamp) - new Date(a.timestamp);
-      }
-    });
-
-    setFilteredRequests(filtered);
-  }, [filterBy, sortBy, searchTerm]);
+  const filteredRequests = loans.filter(
+    (loan) =>
+      loan.status === 0 && // Only show pending loans
+      (filterBy === "all" ||
+        (filterBy === "high-yield" && loan.interestRate >= 6) ||
+        (filterBy === "short-term" && loan.duration <= 30)) &&
+      (searchTerm === "" ||
+        loan.borrower.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        loan.purpose.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const approveLoan = async (request) => {
     if (!isConnected) {
@@ -213,18 +239,23 @@ const SupplyDashboard = () => {
     setStatus("Processing loan approval...");
 
     try {
-      // Simulate transaction processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Check if approval is needed
+      const loanAmount = parseFloat(request.loanAmount);
+      const currentAllowance = parseFloat(allowance);
 
-      setStatus(
-        `✅ Loan approved! ${
-          request.loanAmount
-        } ETH supplied to ${request.borrower.slice(0, 6)}...`
-      );
-      setSelectedRequest(null);
+      if (currentAllowance < loanAmount) {
+        setStatus("Approving BDAG spending...");
+        await approve(loanAmount);
+        // Wait for approval to complete
+        return;
+      }
+
+      // Fund the loan
+      setStatus("Funding loan...");
+      await fundLoan(request.id, request.loanAmount);
     } catch (error) {
-      setStatus("❌ Error approving loan: " + error.message);
-    } finally {
+      console.error("Error in loan approval:", error);
+      setStatus(`❌ Error: ${error.message}`);
       setProcessing(false);
     }
   };
@@ -232,6 +263,10 @@ const SupplyDashboard = () => {
   const calculateTotalRepayment = (amount, rate, duration) => {
     const interest = (amount * rate * duration) / (365 * 100);
     return (amount + interest).toFixed(4);
+  };
+
+  const calculateEstimatedReturn = (amount, rate, duration) => {
+    return ((amount * rate * duration) / (365 * 100)).toFixed(4);
   };
 
   const getRiskColor = (score) => {
@@ -248,6 +283,20 @@ const SupplyDashboard = () => {
 
   const toggleDetails = (id) => {
     setShowDetails((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Portfolio data from contract
+  const portfolioData = {
+    totalSupplied: lenderInfo
+      ? `${formatEther(lenderInfo[0] || 0)} BDAG`
+      : "0.00 BDAG",
+    activeLoans: lenderInfo ? Number(lenderInfo[1] || 0) : 0,
+    totalEarnings: lenderInfo
+      ? `${formatEther(lenderInfo[2] || 0)} BDAG`
+      : "0.00 BDAG",
+    averageAPY: "8.4%", // Calculate from actual data
+    pendingReturns: "0.00 BDAG", // Calculate from active loans
+    riskScore: "Low-Medium",
   };
 
   return (
@@ -273,7 +322,7 @@ const SupplyDashboard = () => {
                     ? `${parseFloat(balance.formatted).toFixed(4)} ${
                         balance.symbol
                       }`
-                    : "0.0000 ETH"}
+                    : "0.0000 BDAG"}
                 </div>
               </div>
             )}
@@ -333,10 +382,10 @@ const SupplyDashboard = () => {
               <CardContent>
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="w-5 h-5 text-orange-400" />
-                  <span className="text-sm text-gray-400">Pending Returns</span>
+                  <span className="text-sm text-gray-400">Platform Loans</span>
                 </div>
                 <div className="text-xl font-bold text-orange-400">
-                  {portfolioData.pendingReturns}
+                  {loanCounter || 0}
                 </div>
               </CardContent>
             </Card>
@@ -399,26 +448,33 @@ const SupplyDashboard = () => {
             >
               <option value="all">All Requests</option>
               <option value="high-yield">High Yield (6%+)</option>
-              <option value="low-risk">Low Risk (85%+)</option>
               <option value="short-term">Short Term (≤30 days)</option>
             </select>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-3 bg-gray-900/50 border border-violet-400/20 rounded-xl text-white focus:border-violet-400 focus:outline-none"
+            <button
+              onClick={() => {
+                refetchLoans();
+                refetchContractData();
+                refetchBalance();
+                refetchAllowance();
+              }}
+              disabled={loadingLoans}
+              className="px-4 py-3 bg-violet-400/20 border border-violet-400/30 rounded-xl text-violet-400 hover:bg-violet-400/30 transition-colors disabled:opacity-50"
             >
-              <option value="newest">Newest First</option>
-              <option value="highest-rate">Highest Rate</option>
-              <option value="lowest-risk">Lowest Risk</option>
-              <option value="amount">Loan Amount</option>
-            </select>
-
-            <button className="px-4 py-3 bg-violet-400/20 border border-violet-400/30 rounded-xl text-violet-400 hover:bg-violet-400/30 transition-colors">
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw
+                className={`w-5 h-5 ${loadingLoans ? "animate-spin" : ""}`}
+              />
             </button>
           </div>
         </div>
+
+        {/* Loading State */}
+        {loadingLoans && (
+          <div className="text-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-violet-400 mx-auto mb-4" />
+            <div className="text-gray-400">Loading loan requests...</div>
+          </div>
+        )}
 
         {/* Loan Requests Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -436,26 +492,16 @@ const SupplyDashboard = () => {
                 <div className="flex justify-between items-start mb-4">
                   <CardTitle className="text-white flex items-center gap-2">
                     <DollarSign className="w-6 h-6 text-violet-400" />
-                    {request.loanAmount} ETH
+                    {request.loanAmount} BDAG
                   </CardTitle>
-                  <div
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskBadge(
-                      request.riskScore
-                    )}`}
-                  >
-                    {request.riskScore}% Safe
+                  <div className="px-2 py-1 rounded-full text-xs font-medium bg-blue-400/20 text-blue-400">
+                    {formatLoanStatus(request.status)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-400">{request.timestamp}</span>
-                  <span
-                    className={`font-bold ${
-                      request.interestRate >= 6
-                        ? "text-green-400"
-                        : "text-yellow-400"
-                    }`}
-                  >
+                  <span className="font-bold text-green-400">
                     {request.interestRate}% APR
                   </span>
                 </div>
@@ -466,10 +512,11 @@ const SupplyDashboard = () => {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center text-gray-300">
                       <User className="w-4 h-4 mr-2" />
-                      <span>Credit Score:</span>
+                      <span>Borrower:</span>
                     </div>
-                    <span className="font-semibold text-white">
-                      {request.creditScore}
+                    <span className="font-semibold text-white font-mono text-xs">
+                      {request.borrower.slice(0, 6)}...
+                      {request.borrower.slice(-4)}
                     </span>
                   </div>
 
@@ -499,7 +546,12 @@ const SupplyDashboard = () => {
                       <span>Your Return:</span>
                     </div>
                     <span className="font-semibold text-green-400">
-                      {request.estimatedReturn.toFixed(4)} ETH
+                      {calculateEstimatedReturn(
+                        request.loanAmount,
+                        request.interestRate,
+                        request.duration
+                      )}{" "}
+                      BDAG
                     </span>
                   </div>
 
@@ -512,73 +564,32 @@ const SupplyDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Toggle detailed view */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleDetails(request.id);
-                    }}
-                    className="w-full mt-3 py-2 text-sm text-violet-400 hover:text-violet-300 flex items-center justify-center gap-2"
-                  >
-                    {showDetails[request.id] ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                    {showDetails[request.id] ? "Hide Details" : "Show Details"}
-                  </button>
-
-                  {/* Detailed information */}
-                  {showDetails[request.id] && (
-                    <div className="mt-3 pt-3 border-t border-gray-700 space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Previous Loans:</span>
-                        <span className="text-white">
-                          {request.previousLoans}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">
-                          Repayment History:
-                        </span>
-                        <span className="text-green-400">
-                          {request.repaymentHistory}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Collateral Ratio:</span>
-                        <span className="text-blue-400">
-                          {request.collateralRatio}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Borrower:</span>
-                        <span className="text-white font-mono text-xs">
-                          {request.borrower.slice(0, 10)}...
-                          {request.borrower.slice(-8)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-400">Collateral Ratio:</span>
+                    <span className="text-blue-400 font-medium">
+                      {request.collateralRatio}%
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {filteredRequests.length === 0 && (
+        {filteredRequests.length === 0 && !loadingLoans && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg mb-4">
-              No loan requests match your criteria
+              No pending loan requests available
             </div>
             <button
               onClick={() => {
                 setFilterBy("all");
                 setSearchTerm("");
+                refetchLoans();
               }}
               className="text-violet-400 hover:text-violet-300"
             >
-              Clear filters
+              Refresh data
             </button>
           </div>
         )}
@@ -590,7 +601,7 @@ const SupplyDashboard = () => {
               <CardHeader className="border-b border-gray-700">
                 <CardTitle className="text-white flex items-center gap-3">
                   <DollarSign className="w-6 h-6 text-violet-400" />
-                  Supply {selectedRequest.loanAmount} ETH
+                  Fund Loan: {selectedRequest.loanAmount} BDAG
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -604,7 +615,7 @@ const SupplyDashboard = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Loan Amount:</span>
                         <span className="text-white font-semibold">
-                          {selectedRequest.loanAmount} ETH
+                          {selectedRequest.loanAmount} BDAG
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -622,7 +633,12 @@ const SupplyDashboard = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Your Return:</span>
                         <span className="text-green-400 font-semibold">
-                          {selectedRequest.estimatedReturn.toFixed(4)} ETH
+                          {calculateEstimatedReturn(
+                            selectedRequest.loanAmount,
+                            selectedRequest.interestRate,
+                            selectedRequest.duration
+                          )}{" "}
+                          BDAG
                         </span>
                       </div>
                       <div className="flex justify-between border-t border-gray-700 pt-3">
@@ -633,53 +649,35 @@ const SupplyDashboard = () => {
                             selectedRequest.interestRate,
                             selectedRequest.duration
                           )}{" "}
-                          ETH
+                          BDAG
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Borrower Profile */}
+                  {/* Collateral & Risk Info */}
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-violet-400">
-                      Borrower Profile
+                      Collateral & Risk
                     </h4>
                     <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Credit Score:</span>
-                        <span className="text-white font-semibold">
-                          {selectedRequest.creditScore}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Risk Score:</span>
-                        <span
-                          className={`font-semibold ${getRiskColor(
-                            selectedRequest.riskScore
-                          )}`}
-                        >
-                          {selectedRequest.riskScore}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Previous Loans:</span>
-                        <span className="text-white font-semibold">
-                          {selectedRequest.previousLoans}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">
-                          Repayment History:
-                        </span>
-                        <span className="text-green-400 font-semibold">
-                          {selectedRequest.repaymentHistory}
-                        </span>
-                      </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Collateral:</span>
                         <span className="text-white font-semibold">
                           {selectedRequest.collateralAmount}{" "}
                           {selectedRequest.collateralType}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Collateral Ratio:</span>
+                        <span className="text-blue-400 font-semibold">
+                          {selectedRequest.collateralRatio}%
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Status:</span>
+                        <span className="text-blue-400 font-semibold">
+                          {formatLoanStatus(selectedRequest.status)}
                         </span>
                       </div>
                       <div className="flex justify-between border-t border-gray-700 pt-3">
@@ -688,33 +686,90 @@ const SupplyDashboard = () => {
                           {selectedRequest.purpose}
                         </span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Borrower:</span>
+                        <span className="text-white font-mono text-xs">
+                          {selectedRequest.borrower.slice(0, 10)}...
+                          {selectedRequest.borrower.slice(-8)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Balance Check */}
+                <div className="mb-6 p-4 bg-gray-800/50 rounded-xl">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-400">Your BDAG Balance:</span>
+                    <span className="text-white font-semibold">
+                      {parseFloat(bdagBalance).toFixed(4)} BDAG
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Required Amount:</span>
+                    <span className="text-violet-400 font-semibold">
+                      {selectedRequest.loanAmount} BDAG
+                    </span>
+                  </div>
+                  {parseFloat(bdagBalance) < selectedRequest.loanAmount && (
+                    <div className="mt-2 text-red-400 text-sm">
+                      Insufficient BDAG balance
+                    </div>
+                  )}
+                </div>
+
+                {/* Allowance Check */}
+                {parseFloat(allowance) < selectedRequest.loanAmount && (
+                  <Alert variant="warning" className="mb-4">
+                    <AlertTriangle className="w-5 h-5" />
+                    You need to approve BDAG spending first. Click "Approve &
+                    Fund" to complete both steps.
+                  </Alert>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex gap-4">
                   <button
                     className="flex-1 bg-violet-500 hover:bg-violet-600 disabled:bg-violet-500/50 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
                     onClick={() => approveLoan(selectedRequest)}
-                    disabled={processing || !isConnected}
+                    disabled={
+                      processing ||
+                      !isConnected ||
+                      parseFloat(bdagBalance) < selectedRequest.loanAmount ||
+                      isFundingPending ||
+                      isFundingConfirming ||
+                      isApprovePending ||
+                      isApproveConfirming
+                    }
                   >
-                    {processing ? (
+                    {isFundingPending ||
+                    isFundingConfirming ||
+                    isApprovePending ||
+                    isApproveConfirming ? (
                       <>
                         <RefreshCw className="w-5 h-5 animate-spin" />
-                        Processing...
+                        {isApprovePending || isApproveConfirming
+                          ? "Approving..."
+                          : "Funding..."}
+                      </>
+                    ) : parseFloat(allowance) < selectedRequest.loanAmount ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Approve & Fund
                       </>
                     ) : (
                       <>
                         <CheckCircle className="w-5 h-5" />
-                        Supply & Earn
+                        Fund Loan
                       </>
                     )}
                   </button>
                   <button
                     className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200"
                     onClick={() => setSelectedRequest(null)}
-                    disabled={processing}
+                    disabled={
+                      processing || isFundingPending || isFundingConfirming
+                    }
                   >
                     Cancel
                   </button>
@@ -723,7 +778,7 @@ const SupplyDashboard = () => {
                 {!isConnected && (
                   <Alert variant="warning" className="mt-4">
                     <AlertTriangle className="w-5 h-5" />
-                    Please connect your wallet to supply liquidity
+                    Please connect your wallet to fund loans
                   </Alert>
                 )}
               </CardContent>
