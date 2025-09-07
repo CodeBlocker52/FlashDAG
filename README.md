@@ -107,7 +107,6 @@ Network Features:
 
 - 👥 **User Verification**: KYC integration capabilities
 - 📊 **Credit Scoring**: On-chain reputation system
-- 📱 **Multi-platform**: Web, mobile, and API access
 - 🎯 **Loan Purposes**: Categorized loan types
 - 📈 **Analytics**: Real-time platform statistics
 
@@ -116,7 +115,7 @@ Network Features:
 - ⏸️ **Emergency Pause**: Circuit breaker for emergencies
 - 👮 **User Management**: Blacklisting and verification
 - 📊 **Platform Monitoring**: Comprehensive analytics
-- 🔧 **Parameter Control**: Adjustable platform settings
+
 
 ---
 
@@ -181,7 +180,7 @@ sequenceDiagram
 | ------------------------ | ------------------- | ---------------------------------------------- |
 | **MicroLendingPlatform** | Core lending logic  | Loan lifecycle, risk management, user profiles |
 | **BDAGToken**            | Platform currency   | ERC20 token with minting/burning capabilities  |
-| **LendingFactory**       | Platform deployment | Creates multiple lending instances             |
+
 
 ---
 
@@ -202,11 +201,6 @@ sequenceDiagram
 - **Supply**: 50B BDAG maximum
 - **Features**: Minting, burning, batch transfers
 
-#### LendingFactory.sol
-
-- **Pattern**: Clone factory using OpenZeppelin Clones
-- **Purpose**: Deploy multiple lending platforms
-- **Features**: Platform management and tracking
 
 ---
 
