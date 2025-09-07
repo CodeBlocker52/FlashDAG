@@ -88,7 +88,7 @@ const Home = () => {
               <div className="space-y-6">
                 <div className="inline-flex items-center px-4 py-2 bg-violet-400/10 border border-violet-400/20 rounded-full text-sm text-violet-300">
                   <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                  Live on Ethereum & Polygon
+                  Live on BlockDAG Testnet
                 </div>
 
                 <h1 className="text-6xl lg:text-7xl font-bold leading-tight">

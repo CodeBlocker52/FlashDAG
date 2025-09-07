@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { 
+import {
   DollarSign,
   Shield,
   Clock,
@@ -15,9 +15,9 @@ import {
   Activity,
   Target,
   Zap,
-  Award
+  Award,
 } from "lucide-react";
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount, useBalance } from "wagmi";
 
 // Custom Card Components
 const Card = ({ className, children, onClick }) => (
@@ -47,9 +47,9 @@ const Alert = ({ children, className, variant = "info" }) => {
     info: "bg-blue-900/30 border-blue-400/30 text-blue-300",
     success: "bg-green-900/30 border-green-400/30 text-green-300",
     warning: "bg-yellow-900/30 border-yellow-400/30 text-yellow-300",
-    error: "bg-red-900/30 border-red-400/30 text-red-300"
+    error: "bg-red-900/30 border-red-400/30 text-red-300",
   };
-  
+
   return (
     <div className={`p-4 rounded-xl border ${variants[variant]} ${className}`}>
       {children}
@@ -64,13 +64,13 @@ const BorrowingDashboard = () => {
   // Form states
   const [loanAmount, setLoanAmount] = useState("");
   const [collateralAmount, setCollateralAmount] = useState("");
-  const [collateralType, setCollateralType] = useState("ETH");
+  const [collateralType, setCollateralType] = useState("BDAG");
   const [duration, setDuration] = useState("30");
   const [interestRate, setInterestRate] = useState("");
   const [loanPurpose, setLoanPurpose] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
-  
+
   // UI states
   const [activeTab, setActiveTab] = useState("request");
   const [showCalculator, setShowCalculator] = useState(false);
@@ -79,80 +79,82 @@ const BorrowingDashboard = () => {
   const [loanRequests, setLoanRequests] = useState([
     {
       id: 1,
-      amount: "2.5 ETH",
-      collateral: "4.0 ETH",
-      collateralType: "ETH",
+      amount: "2.5 BDAG",
+      collateral: "4.0 BDAG",
+      collateralType: "BDAG",
       duration: "30 days",
       interestRate: "6.8%",
-      totalRepayment: "2.64 ETH",
+      totalRepayment: "2.64 BDAG",
       status: "ACTIVE",
       timestamp: "2024-01-10",
       lender: "0x742d...f44e",
       dueDate: "2024-02-09",
-      progress: 65
+      progress: 65,
     },
     {
       id: 2,
-      amount: "1.2 ETH",
-      collateral: "2.0 ETH",
+      amount: "1.2 BDAG",
+      collateral: "2.0 BDAG",
       collateralType: "WBTC",
       duration: "15 days",
       interestRate: "5.2%",
-      totalRepayment: "1.23 ETH",
+      totalRepayment: "1.23 BDAG",
       status: "REPAID",
       timestamp: "2024-01-05",
       lender: "0x932d...f55f",
       dueDate: "2024-01-20",
-      progress: 100
+      progress: 100,
     },
     {
       id: 3,
-      amount: "0.8 ETH",
-      collateral: "1.3 ETH",
-      collateralType: "ETH",
+      amount: "0.8 BDAG",
+      collateral: "1.3 BDAG",
+      collateralType: "BDAG",
       duration: "7 days",
       interestRate: "4.5%",
-      totalRepayment: "0.81 ETH",
+      totalRepayment: "0.81 BDAG",
       status: "PENDING",
       timestamp: "2024-01-14",
       lender: "Matching...",
       dueDate: "2024-01-21",
-      progress: 0
-    }
+      progress: 0,
+    },
   ]);
 
   // Market rates and suggestions
   const marketRates = {
-    "7": { min: 4.2, avg: 5.1, max: 6.8 },
-    "14": { min: 4.5, avg: 5.5, max: 7.2 },
-    "30": { min: 5.8, avg: 6.8, max: 8.5 },
-    "60": { min: 6.5, avg: 7.8, max: 9.2 },
-    "90": { min: 7.2, avg: 8.5, max: 10.1 }
+    7: { min: 4.2, avg: 5.1, max: 6.8 },
+    14: { min: 4.5, avg: 5.5, max: 7.2 },
+    30: { min: 5.8, avg: 6.8, max: 8.5 },
+    60: { min: 6.5, avg: 7.8, max: 9.2 },
+    90: { min: 7.2, avg: 8.5, max: 10.1 },
   };
 
   // User credit profile (mock data)
   const userProfile = {
     creditScore: 742,
-    totalBorrowed: "15.7 ETH",
+    totalBorrowed: "15.7 BDAG",
     repaymentRate: "94.2%",
-    avgLoanSize: "1.8 ETH",
-    preferredRate: "6.2%"
+    avgLoanSize: "1.8 BDAG",
+    preferredRate: "6.2%",
   };
 
   // Portfolio overview
   const portfolioData = {
-    activeBorrows: "4.1 ETH",
-    totalCollateral: "7.8 ETH",
-    nextPayment: "0.67 ETH",
+    activeBorrows: "4.1 BDAG",
+    totalCollateral: "7.8 BDAG",
+    nextPayment: "0.67 BDAG",
     creditUtilization: "52%",
-    avgRate: "6.4%"
+    avgRate: "6.4%",
   };
 
   // Auto-calculate collateral requirement
   useEffect(() => {
     if (loanAmount && !collateralAmount) {
       const collateralRatio = 1.6; // 160% collateral ratio
-      const calculatedCollateral = (parseFloat(loanAmount) * collateralRatio).toFixed(4);
+      const calculatedCollateral = (
+        parseFloat(loanAmount) * collateralRatio
+      ).toFixed(4);
       setCollateralAmount(calculatedCollateral);
     }
   }, [loanAmount]);
@@ -178,7 +180,10 @@ const BorrowingDashboard = () => {
 
   const calculateCollateralRatio = () => {
     if (!loanAmount || !collateralAmount) return null;
-    return ((parseFloat(collateralAmount) / parseFloat(loanAmount)) * 100).toFixed(0);
+    return (
+      (parseFloat(collateralAmount) / parseFloat(loanAmount)) *
+      100
+    ).toFixed(0);
   };
 
   const getHealthScore = () => {
@@ -206,36 +211,39 @@ const BorrowingDashboard = () => {
 
     try {
       // Simulate transaction processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const newLoan = {
         id: Date.now(),
-        amount: `${loanAmount} ETH`,
+        amount: `${loanAmount} BDAG`,
         collateral: `${collateralAmount} ${collateralType}`,
         collateralType: collateralType,
         duration: `${duration} days`,
         interestRate: `${interestRate}%`,
-        totalRepayment: `${calculateTotalRepayment()} ETH`,
+        totalRepayment: `${calculateTotalRepayment()} BDAG`,
         status: "PENDING",
         timestamp: new Date().toLocaleDateString(),
         lender: "Matching...",
-        dueDate: new Date(Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000).toLocaleDateString(),
-        progress: 0
+        dueDate: new Date(
+          Date.now() + parseInt(duration) * 24 * 60 * 60 * 1000
+        ).toLocaleDateString(),
+        progress: 0,
       };
 
-      setLoanRequests(prev => [newLoan, ...prev]);
-      setStatus("Loan request submitted successfully! Matching with lenders...");
-      
+      setLoanRequests((prev) => [newLoan, ...prev]);
+      setStatus(
+        "Loan request submitted successfully! Matching with lenders..."
+      );
+
       // Reset form
       setLoanAmount("");
       setCollateralAmount("");
       setDuration("30");
       setInterestRate("");
       setLoanPurpose("");
-      
+
       // Switch to loans tab
       setTimeout(() => setActiveTab("loans"), 1500);
-
     } catch (error) {
       setStatus("Error creating loan request: " + error.message);
     } finally {
@@ -245,21 +253,31 @@ const BorrowingDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'ACTIVE': return 'text-blue-400 bg-blue-400/20';
-      case 'REPAID': return 'text-green-400 bg-green-400/20';
-      case 'PENDING': return 'text-yellow-400 bg-yellow-400/20';
-      case 'OVERDUE': return 'text-red-400 bg-red-400/20';
-      default: return 'text-gray-400 bg-gray-400/20';
+      case "ACTIVE":
+        return "text-blue-400 bg-blue-400/20";
+      case "REPAID":
+        return "text-green-400 bg-green-400/20";
+      case "PENDING":
+        return "text-yellow-400 bg-yellow-400/20";
+      case "OVERDUE":
+        return "text-red-400 bg-red-400/20";
+      default:
+        return "text-gray-400 bg-gray-400/20";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'ACTIVE': return <Activity className="w-4 h-4" />;
-      case 'REPAID': return <CheckCircle className="w-4 h-4" />;
-      case 'PENDING': return <Clock className="w-4 h-4" />;
-      case 'OVERDUE': return <AlertTriangle className="w-4 h-4" />;
-      default: return <Info className="w-4 h-4" />;
+      case "ACTIVE":
+        return <Activity className="w-4 h-4" />;
+      case "REPAID":
+        return <CheckCircle className="w-4 h-4" />;
+      case "PENDING":
+        return <Clock className="w-4 h-4" />;
+      case "OVERDUE":
+        return <AlertTriangle className="w-4 h-4" />;
+      default:
+        return <Info className="w-4 h-4" />;
     }
   };
 
@@ -286,7 +304,7 @@ const BorrowingDashboard = () => {
                     ? `${parseFloat(balance.formatted).toFixed(4)} ${
                         balance.symbol
                       }`
-                    : "0.0000 ETH"}
+                    : "0.0000 BDAG"}
                 </div>
               </div>
             )}
@@ -438,7 +456,7 @@ const BorrowingDashboard = () => {
                     {/* Loan Amount */}
                     <div>
                       <label className="block text-white mb-3 font-medium">
-                        Loan Amount (ETH) *
+                        Loan Amount (BDAG) *
                       </label>
                       <input
                         type="number"
@@ -450,7 +468,7 @@ const BorrowingDashboard = () => {
                         step="0.01"
                       />
                       <p className="text-gray-400 text-sm mt-2">
-                        Minimum: 0.1 ETH
+                        Minimum: 0.1 BDAG
                       </p>
                     </div>
 
@@ -498,7 +516,7 @@ const BorrowingDashboard = () => {
                           value={collateralType}
                           onChange={(e) => setCollateralType(e.target.value)}
                         >
-                          <option value="ETH">ETH</option>
+                          <option value="BDAG">BDAG</option>
                           <option value="WBTC">WBTC</option>
                           <option value="USDC">USDC</option>
                         </select>
@@ -576,7 +594,7 @@ const BorrowingDashboard = () => {
                         <div>
                           <span className="text-gray-400">Loan Amount:</span>
                           <div className="text-white font-semibold text-lg">
-                            {loanAmount} ETH
+                            {loanAmount} BDAG
                           </div>
                         </div>
                         <div>
@@ -585,7 +603,7 @@ const BorrowingDashboard = () => {
                             {(calculateTotalRepayment() - loanAmount).toFixed(
                               4
                             )}{" "}
-                            ETH
+                            BDAG
                           </div>
                         </div>
                         <div>
@@ -593,7 +611,7 @@ const BorrowingDashboard = () => {
                             Total Repayment:
                           </span>
                           <div className="text-green-400 font-semibold text-lg">
-                            {calculateTotalRepayment()} ETH
+                            {calculateTotalRepayment()} BDAG
                           </div>
                         </div>
                       </div>
@@ -890,6 +908,6 @@ const BorrowingDashboard = () => {
       </div>
     </div>
   );
-}
+};
 
 export default BorrowingDashboard;

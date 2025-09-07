@@ -16,9 +16,9 @@ import {
   Target,
   Award,
   Zap,
-  Star
+  Star,
 } from "lucide-react";
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount, useBalance } from "wagmi";
 
 // Custom Card Components
 const Card = ({ className, children, onClick }) => (
@@ -48,9 +48,9 @@ const Alert = ({ children, className, variant = "info" }) => {
     info: "bg-blue-900/30 border-blue-400/30 text-blue-300",
     success: "bg-green-900/30 border-green-400/30 text-green-300",
     warning: "bg-yellow-900/30 border-yellow-400/30 text-yellow-300",
-    error: "bg-red-900/30 border-red-400/30 text-red-300"
+    error: "bg-red-900/30 border-red-400/30 text-red-300",
   };
-  
+
   return (
     <div className={`p-4 rounded-xl border ${variants[variant]} ${className}`}>
       {children}
@@ -67,7 +67,7 @@ const WithdrawDashboard = () => {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
-  
+
   // UI states
   const [activeTab, setActiveTab] = useState("positions");
   const [showDetails, setShowDetails] = useState({});
@@ -85,11 +85,11 @@ const WithdrawDashboard = () => {
       maturityDate: "2024-02-09",
       daysRemaining: 15,
       status: "ACTIVE",
-      collateral: "4.0 ETH",
-      collateralType: "ETH",
+      collateral: "4.0 BDAG",
+      collateralType: "BDAG",
       riskLevel: "Low",
       canWithdrawEarly: false,
-      earlyWithdrawPenalty: 0.05
+      earlyWithdrawPenalty: 0.05,
     },
     {
       id: 2,
@@ -106,7 +106,7 @@ const WithdrawDashboard = () => {
       collateralType: "WBTC",
       riskLevel: "Low",
       canWithdrawEarly: false,
-      earlyWithdrawPenalty: 0
+      earlyWithdrawPenalty: 0,
     },
     {
       id: 3,
@@ -119,11 +119,11 @@ const WithdrawDashboard = () => {
       maturityDate: "2024-03-13",
       daysRemaining: 45,
       status: "ACTIVE",
-      collateral: "8.5 ETH",
-      collateralType: "ETH",
+      collateral: "8.5 BDAG",
+      collateralType: "BDAG",
       riskLevel: "Medium",
       canWithdrawEarly: true,
-      earlyWithdrawPenalty: 0.15
+      earlyWithdrawPenalty: 0.15,
     },
     {
       id: 4,
@@ -136,12 +136,12 @@ const WithdrawDashboard = () => {
       maturityDate: "2024-01-19",
       daysRemaining: -5,
       status: "MATURED",
-      collateral: "1.28 ETH",
-      collateralType: "ETH",
+      collateral: "1.28 BDAG",
+      collateralType: "BDAG",
       riskLevel: "Low",
       canWithdrawEarly: false,
-      earlyWithdrawPenalty: 0
-    }
+      earlyWithdrawPenalty: 0,
+    },
   ]);
 
   // Withdrawal history
@@ -152,7 +152,7 @@ const WithdrawDashboard = () => {
       type: "Principal + Interest",
       timestamp: "2024-01-08",
       txHash: "0xabc123...",
-      status: "COMPLETED"
+      status: "COMPLETED",
     },
     {
       id: 2,
@@ -160,7 +160,7 @@ const WithdrawDashboard = () => {
       type: "Interest Only",
       timestamp: "2024-01-05",
       txHash: "0xdef456...",
-      status: "COMPLETED"
+      status: "COMPLETED",
     },
     {
       id: 3,
@@ -168,18 +168,18 @@ const WithdrawDashboard = () => {
       type: "Early Withdrawal",
       timestamp: "2024-01-03",
       txHash: "0xghi789...",
-      status: "COMPLETED"
-    }
+      status: "COMPLETED",
+    },
   ]);
 
   // Portfolio summary
   const portfolioData = {
-    totalSupplied: "12.45 ETH",
-    availableToWithdraw: "2.672 ETH",
-    totalEarnings: "1.87 ETH",
-    pendingInterest: "0.632 ETH",
+    totalSupplied: "12.45 BDAG",
+    availableToWithdraw: "2.672 BDAG",
+    totalEarnings: "1.87 BDAG",
+    pendingInterest: "0.632 BDAG",
     activePositions: 2,
-    maturedPositions: 2
+    maturedPositions: 2,
   };
 
   const processWithdraw = async (position, amount) => {
@@ -193,14 +193,17 @@ const WithdrawDashboard = () => {
       return;
     }
 
-    const maxWithdrawable = position.status === "MATURED" 
-      ? position.totalValue 
-      : position.canWithdrawEarly 
+    const maxWithdrawable =
+      position.status === "MATURED"
+        ? position.totalValue
+        : position.canWithdrawEarly
         ? position.principalAmount - position.earlyWithdrawPenalty
         : 0;
 
     if (parseFloat(amount) > maxWithdrawable) {
-      setStatus(`Maximum withdrawable amount is ${maxWithdrawable.toFixed(4)} ETH`);
+      setStatus(
+        `Maximum withdrawable amount is ${maxWithdrawable.toFixed(4)} BDAG`
+      );
       return;
     }
 
@@ -209,28 +212,33 @@ const WithdrawDashboard = () => {
 
     try {
       // Simulate transaction processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Update the position
-      setLendingPositions(prev => 
-        prev.map(pos => 
-          pos.id === position.id 
-            ? { 
-                ...pos, 
+      setLendingPositions((prev) =>
+        prev.map((pos) =>
+          pos.id === position.id
+            ? {
+                ...pos,
                 totalValue: pos.totalValue - parseFloat(amount),
-                principalAmount: Math.max(0, pos.principalAmount - parseFloat(amount)),
-                status: pos.totalValue - parseFloat(amount) <= 0.001 ? "WITHDRAWN" : pos.status
+                principalAmount: Math.max(
+                  0,
+                  pos.principalAmount - parseFloat(amount)
+                ),
+                status:
+                  pos.totalValue - parseFloat(amount) <= 0.001
+                    ? "WITHDRAWN"
+                    : pos.status,
               }
             : pos
         )
       );
 
-      setStatus(`Successfully withdrew ${amount} ETH from position`);
+      setStatus(`Successfully withdrew ${amount} BDAG from position`);
       setSelectedPosition(null);
       setWithdrawAmount("");
-      
-      setTimeout(() => setActiveTab("history"), 1500);
 
+      setTimeout(() => setActiveTab("history"), 1500);
     } catch (error) {
       setStatus("Error processing withdrawal: " + error.message);
     } finally {
@@ -240,33 +248,45 @@ const WithdrawDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'ACTIVE': return 'text-blue-400 bg-blue-400/20';
-      case 'MATURED': return 'text-green-400 bg-green-400/20';
-      case 'WITHDRAWN': return 'text-gray-400 bg-gray-400/20';
-      default: return 'text-gray-400 bg-gray-400/20';
+      case "ACTIVE":
+        return "text-blue-400 bg-blue-400/20";
+      case "MATURED":
+        return "text-green-400 bg-green-400/20";
+      case "WITHDRAWN":
+        return "text-gray-400 bg-gray-400/20";
+      default:
+        return "text-gray-400 bg-gray-400/20";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'ACTIVE': return <Activity className="w-4 h-4" />;
-      case 'MATURED': return <CheckCircle className="w-4 h-4" />;
-      case 'WITHDRAWN': return <ArrowDown className="w-4 h-4" />;
-      default: return <Info className="w-4 h-4" />;
+      case "ACTIVE":
+        return <Activity className="w-4 h-4" />;
+      case "MATURED":
+        return <CheckCircle className="w-4 h-4" />;
+      case "WITHDRAWN":
+        return <ArrowDown className="w-4 h-4" />;
+      default:
+        return <Info className="w-4 h-4" />;
     }
   };
 
   const getRiskColor = (risk) => {
     switch (risk) {
-      case 'Low': return 'text-green-400';
-      case 'Medium': return 'text-yellow-400';
-      case 'High': return 'text-red-400';
-      default: return 'text-gray-400';
+      case "Low":
+        return "text-green-400";
+      case "Medium":
+        return "text-yellow-400";
+      case "High":
+        return "text-red-400";
+      default:
+        return "text-gray-400";
     }
   };
 
   const toggleDetails = (id) => {
-    setShowDetails(prev => ({ ...prev, [id]: !prev[id] }));
+    setShowDetails((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const calculateMaxWithdraw = (position) => {
@@ -274,7 +294,10 @@ const WithdrawDashboard = () => {
       return position.totalValue;
     }
     if (position.canWithdrawEarly) {
-      return Math.max(0, position.principalAmount - position.earlyWithdrawPenalty);
+      return Math.max(
+        0,
+        position.principalAmount - position.earlyWithdrawPenalty
+      );
     }
     return 0;
   };
@@ -299,8 +322,10 @@ const WithdrawDashboard = () => {
                 <div className="text-sm text-gray-400 mb-1">Your Balance</div>
                 <div className="text-2xl font-bold text-white">
                   {balance
-                    ? `${parseFloat(balance.formatted).toFixed(4)} ${balance.symbol}`
-                    : "0.0000 ETH"}
+                    ? `${parseFloat(balance.formatted).toFixed(4)} ${
+                        balance.symbol
+                      }`
+                    : "0.0000 BDAG"}
                 </div>
               </div>
             )}
@@ -348,7 +373,9 @@ const WithdrawDashboard = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="w-5 h-5 text-orange-400" />
-                  <span className="text-sm text-gray-400">Pending Interest</span>
+                  <span className="text-sm text-gray-400">
+                    Pending Interest
+                  </span>
                 </div>
                 <div className="text-xl font-bold text-orange-400">
                   {portfolioData.pendingInterest}
@@ -419,9 +446,14 @@ const WithdrawDashboard = () => {
             className="mb-6"
           >
             <div className="flex items-center gap-2">
-              {status.includes("Successfully") && <CheckCircle className="w-5 h-5" />}
-              {status.includes("Error") && <AlertTriangle className="w-5 h-5" />}
-              {!status.includes("Successfully") && !status.includes("Error") && <Info className="w-5 h-5" />}
+              {status.includes("Successfully") && (
+                <CheckCircle className="w-5 h-5" />
+              )}
+              {status.includes("Error") && (
+                <AlertTriangle className="w-5 h-5" />
+              )}
+              {!status.includes("Successfully") &&
+                !status.includes("Error") && <Info className="w-5 h-5" />}
               {status}
             </div>
           </Alert>
@@ -453,14 +485,20 @@ const WithdrawDashboard = () => {
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-white flex items-center gap-2">
                           <DollarSign className="w-6 h-6 text-violet-400" />
-                          {position.totalValue.toFixed(4)} ETH
+                          {position.totalValue.toFixed(4)} BDAG
                         </CardTitle>
                         <div className="flex gap-2">
-                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(position.riskLevel)}`}>
+                          <div
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(
+                              position.riskLevel
+                            )}`}
+                          >
                             {position.riskLevel} Risk
                           </div>
                           <div
-                            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(position.status)}`}
+                            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(
+                              position.status
+                            )}`}
                           >
                             {getStatusIcon(position.status)}
                             {position.status}
@@ -471,18 +509,20 @@ const WithdrawDashboard = () => {
                     <CardContent>
                       <div className="grid md:grid-cols-4 gap-6">
                         <div>
-                          <h4 className="text-gray-400 text-sm mb-2">Position Details</h4>
+                          <h4 className="text-gray-400 text-sm mb-2">
+                            Position Details
+                          </h4>
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-400">Principal:</span>
                               <span className="text-white font-semibold">
-                                {position.principalAmount.toFixed(4)} ETH
+                                {position.principalAmount.toFixed(4)} BDAG
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Interest:</span>
                               <span className="text-green-400 font-semibold">
-                                {position.interestEarned.toFixed(4)} ETH
+                                {position.interestEarned.toFixed(4)} BDAG
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -495,27 +535,43 @@ const WithdrawDashboard = () => {
                         </div>
 
                         <div>
-                          <h4 className="text-gray-400 text-sm mb-2">Timeline</h4>
+                          <h4 className="text-gray-400 text-sm mb-2">
+                            Timeline
+                          </h4>
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-400">Start Date:</span>
-                              <span className="text-white">{position.startDate}</span>
+                              <span className="text-white">
+                                {position.startDate}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Maturity:</span>
-                              <span className="text-white">{position.maturityDate}</span>
+                              <span className="text-white">
+                                {position.maturityDate}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Days Left:</span>
-                              <span className={`${position.daysRemaining < 0 ? 'text-green-400' : 'text-yellow-400'}`}>
-                                {position.daysRemaining < 0 ? 'Matured' : position.daysRemaining}
+                              <span
+                                className={`${
+                                  position.daysRemaining < 0
+                                    ? "text-green-400"
+                                    : "text-yellow-400"
+                                }`}
+                              >
+                                {position.daysRemaining < 0
+                                  ? "Matured"
+                                  : position.daysRemaining}
                               </span>
                             </div>
                           </div>
                         </div>
 
                         <div>
-                          <h4 className="text-gray-400 text-sm mb-2">Collateral</h4>
+                          <h4 className="text-gray-400 text-sm mb-2">
+                            Collateral
+                          </h4>
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-400">Amount:</span>
@@ -525,13 +581,18 @@ const WithdrawDashboard = () => {
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Borrower:</span>
-                              <span className="text-white">{position.borrower}</span>
+                              <span className="text-white">
+                                {position.borrower}
+                              </span>
                             </div>
                             {position.canWithdrawEarly && (
                               <div className="flex justify-between">
-                                <span className="text-gray-400">Early Penalty:</span>
+                                <span className="text-gray-400">
+                                  Early Penalty:
+                                </span>
                                 <span className="text-red-400">
-                                  {position.earlyWithdrawPenalty.toFixed(4)} ETH
+                                  {position.earlyWithdrawPenalty.toFixed(4)}{" "}
+                                  BDAG
                                 </span>
                               </div>
                             )}
@@ -539,12 +600,16 @@ const WithdrawDashboard = () => {
                         </div>
 
                         <div>
-                          <h4 className="text-gray-400 text-sm mb-2">Actions</h4>
+                          <h4 className="text-gray-400 text-sm mb-2">
+                            Actions
+                          </h4>
                           <div className="space-y-2">
                             <div className="text-sm">
-                              <span className="text-gray-400">Max Withdraw:</span>
+                              <span className="text-gray-400">
+                                Max Withdraw:
+                              </span>
                               <div className="text-white font-semibold">
-                                {calculateMaxWithdraw(position).toFixed(4)} ETH
+                                {calculateMaxWithdraw(position).toFixed(4)} BDAG
                               </div>
                             </div>
                             <button
@@ -563,40 +628,76 @@ const WithdrawDashboard = () => {
                         onClick={() => toggleDetails(position.id)}
                         className="w-full mt-4 py-2 text-sm text-violet-400 hover:text-violet-300 flex items-center justify-center gap-2"
                       >
-                        {showDetails[position.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        {showDetails[position.id] ? "Hide Details" : "Show Details"}
+                        {showDetails[position.id] ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                        {showDetails[position.id]
+                          ? "Hide Details"
+                          : "Show Details"}
                       </button>
 
                       {/* Detailed View */}
                       {showDetails[position.id] && (
                         <div className="mt-4 pt-4 border-t border-gray-700 grid md:grid-cols-2 gap-4 text-sm">
                           <div>
-                            <h5 className="text-violet-400 font-medium mb-2">Earnings Breakdown</h5>
+                            <h5 className="text-violet-400 font-medium mb-2">
+                              Earnings Breakdown
+                            </h5>
                             <div className="space-y-1">
                               <div className="flex justify-between">
-                                <span className="text-gray-400">Daily Interest:</span>
+                                <span className="text-gray-400">
+                                  Daily Interest:
+                                </span>
                                 <span className="text-green-400">
-                                  {((position.principalAmount * position.interestRate / 100) / 365).toFixed(6)} ETH
+                                  {(
+                                    (position.principalAmount *
+                                      position.interestRate) /
+                                    100 /
+                                    365
+                                  ).toFixed(6)}{" "}
+                                  BDAG
                                 </span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400">Projected Total:</span>
+                                <span className="text-gray-400">
+                                  Projected Total:
+                                </span>
                                 <span className="text-yellow-400">
-                                  {(position.principalAmount * position.interestRate / 100 * (position.daysRemaining + (new Date(position.maturityDate) - new Date(position.startDate)) / (24 * 60 * 60 * 1000)) / 365).toFixed(4)} ETH
+                                  {(
+                                    (((position.principalAmount *
+                                      position.interestRate) /
+                                      100) *
+                                      (position.daysRemaining +
+                                        (new Date(position.maturityDate) -
+                                          new Date(position.startDate)) /
+                                          (24 * 60 * 60 * 1000))) /
+                                    365
+                                  ).toFixed(4)}{" "}
+                                  BDAG
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div>
-                            <h5 className="text-violet-400 font-medium mb-2">Risk Assessment</h5>
+                            <h5 className="text-violet-400 font-medium mb-2">
+                              Risk Assessment
+                            </h5>
                             <div className="space-y-1">
                               <div className="flex justify-between">
-                                <span className="text-gray-400">Collateral Ratio:</span>
+                                <span className="text-gray-400">
+                                  Collateral Ratio:
+                                </span>
                                 <span className="text-blue-400">160%</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-gray-400">Liquidation Risk:</span>
-                                <span className={getRiskColor(position.riskLevel)}>
+                                <span className="text-gray-400">
+                                  Liquidation Risk:
+                                </span>
+                                <span
+                                  className={getRiskColor(position.riskLevel)}
+                                >
                                   {position.riskLevel}
                                 </span>
                               </div>
@@ -629,14 +730,17 @@ const WithdrawDashboard = () => {
               </Card>
             ) : (
               withdrawHistory.map((withdrawal) => (
-                <Card key={withdrawal.id} className="bg-gray-900/50 border border-violet-400/20">
+                <Card
+                  key={withdrawal.id}
+                  className="bg-gray-900/50 border border-violet-400/20"
+                >
                   <CardContent>
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="flex items-center gap-3 mb-2">
                           <ArrowDown className="w-5 h-5 text-green-400" />
                           <span className="text-xl font-semibold text-white">
-                            {withdrawal.amount.toFixed(4)} ETH
+                            {withdrawal.amount.toFixed(4)} BDAG
                           </span>
                           <span className="px-2 py-1 rounded-full text-xs bg-green-400/20 text-green-400">
                             {withdrawal.status}
@@ -645,11 +749,15 @@ const WithdrawDashboard = () => {
                         <div className="space-y-1 text-sm text-gray-400">
                           <div>Type: {withdrawal.type}</div>
                           <div>Date: {withdrawal.timestamp}</div>
-                          <div className="font-mono">Tx: {withdrawal.txHash}</div>
+                          <div className="font-mono">
+                            Tx: {withdrawal.txHash}
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-gray-400 mb-1">Transaction Hash</div>
+                        <div className="text-sm text-gray-400 mb-1">
+                          Transaction Hash
+                        </div>
                         <button className="text-violet-400 hover:text-violet-300 text-sm">
                           View on Explorer
                         </button>
@@ -676,18 +784,21 @@ const WithdrawDashboard = () => {
                 <div className="space-y-6">
                   {/* Position Summary */}
                   <div className="bg-violet-900/20 border border-violet-400/30 rounded-xl p-4">
-                    <h4 className="text-white font-semibold mb-3">Position Summary</h4>
+                    <h4 className="text-white font-semibold mb-3">
+                      Position Summary
+                    </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-400">Total Value:</span>
                         <div className="text-white font-semibold">
-                          {selectedPosition.totalValue.toFixed(4)} ETH
+                          {selectedPosition.totalValue.toFixed(4)} BDAG
                         </div>
                       </div>
                       <div>
                         <span className="text-gray-400">Max Withdraw:</span>
                         <div className="text-green-400 font-semibold">
-                          {calculateMaxWithdraw(selectedPosition).toFixed(4)} ETH
+                          {calculateMaxWithdraw(selectedPosition).toFixed(4)}{" "}
+                          BDAG
                         </div>
                       </div>
                     </div>
@@ -696,7 +807,7 @@ const WithdrawDashboard = () => {
                   {/* Withdrawal Amount Input */}
                   <div>
                     <label className="block text-white mb-3 font-medium">
-                      Withdrawal Amount (ETH) *
+                      Withdrawal Amount (BDAG) *
                     </label>
                     <input
                       type="number"
@@ -710,10 +821,15 @@ const WithdrawDashboard = () => {
                     />
                     <div className="flex justify-between mt-2 text-sm">
                       <span className="text-gray-400">
-                        Available: {calculateMaxWithdraw(selectedPosition).toFixed(4)} ETH
+                        Available:{" "}
+                        {calculateMaxWithdraw(selectedPosition).toFixed(4)} BDAG
                       </span>
                       <button
-                        onClick={() => setWithdrawAmount(calculateMaxWithdraw(selectedPosition).toString())}
+                        onClick={() =>
+                          setWithdrawAmount(
+                            calculateMaxWithdraw(selectedPosition).toString()
+                          )
+                        }
                         className="text-violet-400 hover:text-violet-300"
                       >
                         Use Max
@@ -722,30 +838,38 @@ const WithdrawDashboard = () => {
                   </div>
 
                   {/* Early Withdrawal Warning */}
-                  {selectedPosition.canWithdrawEarly && selectedPosition.status === "ACTIVE" && (
-                    <Alert variant="warning">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5" />
-                        <div>
-                          <div className="font-medium">Early Withdrawal Penalty</div>
-                          <div className="text-sm mt-1">
-                            Withdrawing before maturity incurs a penalty of {selectedPosition.earlyWithdrawPenalty.toFixed(4)} ETH
+                  {selectedPosition.canWithdrawEarly &&
+                    selectedPosition.status === "ACTIVE" && (
+                      <Alert variant="warning">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          <div>
+                            <div className="font-medium">
+                              Early Withdrawal Penalty
+                            </div>
+                            <div className="text-sm mt-1">
+                              Withdrawing before maturity incurs a penalty of{" "}
+                              {selectedPosition.earlyWithdrawPenalty.toFixed(4)}{" "}
+                              BDAG
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Alert>
-                  )}
+                      </Alert>
+                    )}
 
                   {/* Action Buttons */}
                   <div className="flex gap-4">
                     <button
                       className="flex-1 bg-violet-500 hover:bg-violet-600 disabled:bg-violet-500/50 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
-                      onClick={() => processWithdraw(selectedPosition, withdrawAmount)}
+                      onClick={() =>
+                        processWithdraw(selectedPosition, withdrawAmount)
+                      }
                       disabled={
                         loading ||
                         !withdrawAmount ||
                         parseFloat(withdrawAmount) <= 0 ||
-                        parseFloat(withdrawAmount) > calculateMaxWithdraw(selectedPosition) ||
+                        parseFloat(withdrawAmount) >
+                          calculateMaxWithdraw(selectedPosition) ||
                         !isConnected
                       }
                     >

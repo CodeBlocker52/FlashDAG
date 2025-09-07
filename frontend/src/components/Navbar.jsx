@@ -13,6 +13,7 @@ const Navbar = () => {
   const { address, isConnected, chain } = useAccount();
   const { disconnect } = useDisconnect();
 
+  console.log('chain', chain)
   // Format address for display
   const formatAddress = (addr) => {
     if (!addr) return '';
@@ -97,12 +98,12 @@ const Navbar = () => {
 
           {/* Wallet Connection - Right Side */}
           <div className="hidden md:flex items-center space-x-3">
-            {isConnected && chain && (
+            {/* {isConnected && chain && (
               <div className="flex items-center space-x-2 text-sm text-gray-400">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span className="hidden lg:block">{chain.name}</span>
               </div>
-            )}
+            )} */}
             
             <button
               onClick={handleWalletAction}

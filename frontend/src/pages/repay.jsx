@@ -86,8 +86,8 @@ const RepayDashboard = () => {
       dueDate: "2024-02-09",
       daysRemaining: 15,
       status: "ACTIVE",
-      collateral: "4.0 ETH",
-      collateralType: "ETH",
+      collateral: "4.0 BDAG",
+      collateralType: "BDAG",
       healthFactor: 1.87,
       minimumPayment: 0.05,
       nextPaymentDue: "2024-01-25",
@@ -125,8 +125,8 @@ const RepayDashboard = () => {
       dueDate: "2024-03-13",
       daysRemaining: 45,
       status: "ACTIVE",
-      collateral: "8.5 ETH",
-      collateralType: "ETH",
+      collateral: "8.5 BDAG",
+      collateralType: "BDAG",
       healthFactor: 2.1,
       minimumPayment: 0.08,
       nextPaymentDue: "2024-02-13",
@@ -144,8 +144,8 @@ const RepayDashboard = () => {
       dueDate: "2024-01-19",
       daysRemaining: 3,
       status: "DUE_SOON",
-      collateral: "1.28 ETH",
-      collateralType: "ETH",
+      collateral: "1.28 BDAG",
+      collateralType: "BDAG",
       healthFactor: 1.92,
       minimumPayment: 0.807,
       nextPaymentDue: "2024-01-19",
@@ -193,10 +193,10 @@ const RepayDashboard = () => {
 
   // Portfolio summary
   const portfolioData = {
-    totalBorrowed: "10.1 ETH",
-    totalOwed: "10.862 ETH",
-    nextPayment: "0.05 ETH",
-    totalCollateral: "16.66 ETH",
+    totalBorrowed: "10.1 BDAG",
+    totalOwed: "10.862 BDAG",
+    nextPayment: "0.05 BDAG",
+    totalCollateral: "16.66 BDAG",
     avgHealthFactor: "1.86",
     overdueLoans: 1
   };
@@ -253,7 +253,7 @@ const RepayDashboard = () => {
         })
       );
 
-      setStatus(`Successfully repaid ${amount} ETH${isFullRepayment ? ' (Full Repayment)' : ''}`);
+      setStatus(`Successfully repaid ${amount} BDAG${isFullRepayment ? ' (Full Repayment)' : ''}`);
       setSelectedLoan(null);
       setRepayAmount("");
       
@@ -321,7 +321,7 @@ const RepayDashboard = () => {
                 <div className="text-2xl font-bold text-white">
                   {balance
                     ? `${parseFloat(balance.formatted).toFixed(4)} ${balance.symbol}`
-                    : "0.0000 ETH"}
+                    : "0.0000 BDAG"}
                 </div>
               </div>
             )}
@@ -480,7 +480,7 @@ const RepayDashboard = () => {
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-white flex items-center gap-2">
                           <DollarSign className="w-6 h-6 text-violet-400" />
-                          {loan.totalOwed.toFixed(4)} ETH Owed
+                          {loan.totalOwed.toFixed(4)} BDAG Owed
                         </CardTitle>
                         <div className="flex gap-2">
                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${getHealthColor(loan.healthFactor)}`}>
@@ -503,13 +503,13 @@ const RepayDashboard = () => {
                             <div className="flex justify-between">
                               <span className="text-gray-400">Principal:</span>
                               <span className="text-white font-semibold">
-                                {loan.principalAmount.toFixed(4)} ETH
+                                {loan.principalAmount.toFixed(4)} BDAG
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Interest:</span>
                               <span className="text-red-400 font-semibold">
-                                {loan.interestOwed.toFixed(4)} ETH
+                                {loan.interestOwed.toFixed(4)} BDAG
                               </span>
                             </div>
                             <div className="flex justify-between">
@@ -522,7 +522,7 @@ const RepayDashboard = () => {
                               <div className="flex justify-between">
                                 <span className="text-gray-400">Overdue Fee:</span>
                                 <span className="text-red-400 font-semibold">
-                                  {loan.overdueInterest.toFixed(4)} ETH
+                                  {loan.overdueInterest.toFixed(4)} BDAG
                                 </span>
                               </div>
                             )}
@@ -585,7 +585,7 @@ const RepayDashboard = () => {
                             <div className="text-sm">
                               <span className="text-gray-400">Min Payment:</span>
                               <div className="text-white font-semibold">
-                                {loan.minimumPayment.toFixed(4)} ETH
+                                {loan.minimumPayment.toFixed(4)} BDAG
                               </div>
                             </div>
                             <div className="flex flex-col gap-2">
@@ -629,20 +629,20 @@ const RepayDashboard = () => {
                               <div className="flex justify-between">
                                 <span className="text-gray-400">Daily Interest:</span>
                                 <span className="text-red-400">
-                                  {calculateDailyInterest(loan.principalAmount, loan.interestRate).toFixed(6)} ETH
+                                  {calculateDailyInterest(loan.principalAmount, loan.interestRate).toFixed(6)} BDAG
                                 </span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-gray-400">Accrued So Far:</span>
                                 <span className="text-yellow-400">
-                                  {loan.interestOwed.toFixed(4)} ETH
+                                  {loan.interestOwed.toFixed(4)} BDAG
                                 </span>
                               </div>
                               {loan.status === "OVERDUE" && (
                                 <div className="flex justify-between">
                                   <span className="text-gray-400">Late Fees:</span>
                                   <span className="text-red-400">
-                                    {loan.overdueInterest?.toFixed(4)} ETH
+                                    {loan.overdueInterest?.toFixed(4)} BDAG
                                   </span>
                                 </div>
                               )}
@@ -705,7 +705,7 @@ const RepayDashboard = () => {
                         <div className="flex items-center gap-3 mb-2">
                           <CreditCard className="w-5 h-5 text-green-400" />
                           <span className="text-xl font-semibold text-white">
-                            {payment.amount.toFixed(4)} ETH
+                            {payment.amount.toFixed(4)} BDAG
                           </span>
                           <span className="px-2 py-1 rounded-full text-xs bg-green-400/20 text-green-400">
                             {payment.status}
@@ -721,11 +721,11 @@ const RepayDashboard = () => {
                         <div className="space-y-1">
                           <div>
                             <span className="text-gray-400">Interest Paid: </span>
-                            <span className="text-red-400">{payment.interestPaid.toFixed(4)} ETH</span>
+                            <span className="text-red-400">{payment.interestPaid.toFixed(4)} BDAG</span>
                           </div>
                           <div>
                             <span className="text-gray-400">Principal Paid: </span>
-                            <span className="text-blue-400">{payment.principalPaid.toFixed(4)} ETH</span>
+                            <span className="text-blue-400">{payment.principalPaid.toFixed(4)} BDAG</span>
                           </div>
                           <button className="text-violet-400 hover:text-violet-300">
                             View on Explorer
@@ -767,20 +767,20 @@ const RepayDashboard = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-400">Principal Owed:</span>
                           <span className="text-white font-semibold">
-                            {selectedLoan.principalAmount.toFixed(4)} ETH
+                            {selectedLoan.principalAmount.toFixed(4)} BDAG
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Interest Owed:</span>
                           <span className="text-red-400 font-semibold">
-                            {selectedLoan.interestOwed.toFixed(4)} ETH
+                            {selectedLoan.interestOwed.toFixed(4)} BDAG
                           </span>
                         </div>
                         {selectedLoan.overdueInterest && (
                           <div className="flex justify-between">
                             <span className="text-gray-400">Late Fees:</span>
                             <span className="text-red-400 font-semibold">
-                              {selectedLoan.overdueInterest.toFixed(4)} ETH
+                              {selectedLoan.overdueInterest.toFixed(4)} BDAG
                             </span>
                           </div>
                         )}
@@ -789,13 +789,13 @@ const RepayDashboard = () => {
                         <div className="flex justify-between">
                           <span className="text-gray-400">Total Owed:</span>
                           <span className="text-white font-bold text-lg">
-                            {selectedLoan.totalOwed.toFixed(4)} ETH
+                            {selectedLoan.totalOwed.toFixed(4)} BDAG
                           </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Minimum Payment:</span>
                           <span className="text-orange-400 font-semibold">
-                            {selectedLoan.minimumPayment.toFixed(4)} ETH
+                            {selectedLoan.minimumPayment.toFixed(4)} BDAG
                           </span>
                         </div>
                         <div className="flex justify-between">
@@ -811,7 +811,7 @@ const RepayDashboard = () => {
                   {/* Repayment Amount Input */}
                   <div>
                     <label className="block text-white mb-3 font-medium">
-                      Repayment Amount (ETH) *
+                      Repayment Amount (BDAG) *
                     </label>
                     <input
                       type="number"
@@ -825,7 +825,7 @@ const RepayDashboard = () => {
                     />
                     <div className="flex justify-between mt-2 text-sm">
                       <span className="text-gray-400">
-                        Your Balance: {balance ? parseFloat(balance.formatted).toFixed(4) : "0.0000"} ETH
+                        Your Balance: {balance ? parseFloat(balance.formatted).toFixed(4) : "0.0000"} BDAG
                       </span>
                       <div className="flex gap-2">
                         <button
@@ -880,7 +880,7 @@ const RepayDashboard = () => {
                         <div>
                           <span className="text-gray-400">Remaining Debt:</span>
                           <div className="text-white font-semibold">
-                            {Math.max(0, selectedLoan.totalOwed - parseFloat(repayAmount)).toFixed(4)} ETH
+                            {Math.max(0, selectedLoan.totalOwed - parseFloat(repayAmount)).toFixed(4)} BDAG
                           </div>
                         </div>
                         <div>
