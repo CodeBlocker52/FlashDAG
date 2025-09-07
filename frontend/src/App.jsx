@@ -9,10 +9,11 @@ import { mainnet, arbitrum, polygon, optimism, base, sepolia } from '@reown/appk
 import Navbar from './components/Navbar.jsx';
 import Home from './pages/Home.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import Borrowing from './pages/Borrowing.jsx';
 import About from './pages/About.jsx';
-import Lending from './pages/Lending.jsx';
-import AuthSign from './pages/AuthSign.jsx';
+import SupplyDashboard from "./pages/Lending.jsx";
+import BorrowDashboard from "./pages/Borrowing.jsx";
+import WithdrawDashboard from './pages/withdraw.jsx';
+import RepayDashboard from './pages/repay.jsx';
 import {config} from './config/wagmi.js';
 // Create a QueryClient instance
 const queryClient = new QueryClient({
@@ -33,11 +34,12 @@ const App = () => {
             <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/lending" element={<Lending />} />
-              <Route path="/borrowing" element={<Borrowing />} />
+              <Route path="/supply" element={<SupplyDashboard />} />
+              <Route path="/borrow" element={<BorrowDashboard />} />
+              <Route path="/withdraw" element={<WithdrawDashboard />} />
+              <Route path="/repay" element={<RepayDashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/about" element={<About />} />
-              <Route path="/authsign" element={<AuthSign />} />
             </Routes>
           </div>
         </Router>
