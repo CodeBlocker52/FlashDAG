@@ -13,28 +13,7 @@ _A production-ready, decentralized micro lending platform built on BlockDAG netw
 
 </div>
 
----
 
-## 📋 Table of Contents
-
-- [Project Introduction](#-project-introduction)
-- [Problem Statement](#-problem-statement)
-- [Why BlockDAG?](#-why-blockdag)
-- [Features](#-features)
-- [Contract Architecture](#-contract-architecture)
-- [Project Structure](#-project-structure)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Development Guide](#-development-guide)
-- [Testing](#-testing)
-- [Deployment](#-deployment)
-- [Usage Examples](#-usage-examples)
-- [Security](#-security)
-- [Contributing](#-contributing)
-- [Deployed Contracts](#-deployed-contracts)
-- [License](#-license)
-
----
 
 ## 🌟 Project Introduction
 
