@@ -9,7 +9,7 @@
 
 _A production-ready, decentralized micro lending platform built on BlockDAG network_
 
-[📖 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [🔧 Development](#development) • [🌐 Deployment](#deployment)
+
 
 </div>
 
@@ -206,30 +206,7 @@ sequenceDiagram
 
 ---
 
-## 📁 Project Structure
 
-```
-blockdag-microlending-platform/
-├── 📁 src/                          # Smart contracts
-│   ├── 📄 MicroLendingPlatform.sol   # Main lending contract
-│   └── 📄 BDAGToken.sol              # BDAG token implementation
-├── 📁 test/                          # Test files
-│   ├── 📄 TestMicroLending.t.sol     # Comprehensive test suite
-│   └── 📄 IntegrationTest.t.sol      # End-to-end integration tests
-├── 📁 script/                        # Deployment scripts
-│   ├── 📄 Deploy.s.sol               # Main deployment script
-│   └── 📄 Setup.s.sol                # Initial setup script
-├── 📁 lib/                           # Dependencies
-│   ├── 📁 forge-std/                 # Foundry standard library
-│   └── 📁 openzeppelin-contracts/    # OpenZeppelin contracts
-├── 📁 deployments/                   # Deployment artifacts
-├── 📄 foundry.toml                   # Foundry configuration
-├── 📄 Makefile                       # Build automation
-├── 📄 package.json                   # NPM configuration
-├── 📄 .env.example                   # Environment template
-└── 📄 README.md                      # Documentation
-
-```
 
 ### Contract Details
 
@@ -288,7 +265,7 @@ blockdag-microlending-platform/
 | Technology         | Purpose                | Status     |
 | ------------------ | ---------------------- | ---------- |
 | **TypeScript**     | Type safety            | Ready      |
-| **Ethers.js**      | Blockchain interaction | Compatible |
+| **Wagmi**      | Blockchain interaction | Compatible |
 | **Web3 Libraries** | DApp integration       | Supported  |
 | **React/Vue**      | Frontend frameworks    | Compatible |
 
@@ -340,26 +317,13 @@ anvil --version
 4. **Build contracts**
 
    ```bash
-   make build
+   forge build
    ```
 
 5. **Run tests**
    ```bash
-   make test
+   forge test
    ```
-
-### Quick Commands
-
-| Command               | Description                  |
-| --------------------- | ---------------------------- |
-| `make help`           | Show all available commands  |
-| `make build`          | Compile contracts            |
-| `make test`           | Run all tests                |
-| `make test-gas`       | Run tests with gas reporting |
-| `make deploy-local`   | Deploy to local network      |
-| `make deploy-testnet` | Deploy to BlockDAG testnet   |
-
----
 
 ## 🔧 Development Guide
 
@@ -416,72 +380,10 @@ graph LR
 
 ---
 
-## 🧪 Testing
-
-### Test Categories
-
-#### 1. Unit Tests (`TestMicroLending.t.sol`)
-
-- ✅ Basic loan lifecycle
-- ✅ Edge cases and error handling
-- ✅ Admin functions
-- ✅ Security features
-- ✅ Mathematical calculations
-
-#### 2. Integration Tests (`IntegrationTest.t.sol`)
-
-- ✅ Complete ecosystem flow
-- ✅ Multiple user scenarios
-- ✅ Cross-contract interactions
-- ✅ Real-world use cases
-
-#### 3. Fuzz Tests
-
-- ✅ Random input validation
-- ✅ Boundary condition testing
-- ✅ Unexpected parameter combinations
-
-#### 4. Invariant Tests
-
-- ✅ System state consistency
-- ✅ Token balance correctness
-- ✅ Mathematical invariants
-
-### Running Tests
-
-```bash
-# All tests with verbose output
-make test
-
-# Gas reporting
-make test-gas
-
-# Coverage report
-make test-coverage
-
-# Fuzz testing
-make fuzz
-
-# Specific test
-make test-specific TEST=testRequestLoan
-
-# Invariant testing
-make invariant
-```
-
-### Test Results
-
-```
-Test Results:
-├── Passing: 45/45 ✅
-├── Coverage: 97.2% ✅
-├── Gas Usage: Optimized ✅
-└── Security: No issues ✅
-```
-
----
-
 ## 🌐 Deployment
+Deployed Contracts on Premodial Testnet :
+MicroLendingPlatform : (0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41)[https://primordial.bdagscan.com/contractOverview/0x71E4DaE30Ee0e34E3fC737b6e3387f02B60a6C41?chain=EVM]
+BDAGToken : (0x420070D88992e39c36B48c757e9ac1E9070f525d)[https://primordial.bdagscan.com/contractOverview/0x420070D88992e39c36B48c757e9ac1E9070f525d?chain=EVM]
 
 ### Local Deployment
 
@@ -508,31 +410,6 @@ make setup-testnet
 # Verify deployment
 make check-env
 ```
-
-### Deployment Verification
-
-After deployment, verify:
-
-1. **Contract Addresses**: Check `deployments/latest.json`
-2. **Initial State**: Run platform statistics
-3. **Token Distribution**: Verify token balances
-4. **Access Controls**: Test admin functions
-
-### Post-Deployment Setup
-
-```bash
-# Create test loan
-make create-loan BORROWER_ADDRESS=0x... AMOUNT=10000
-
-# Fund a loan
-make fund-loan LOAN_ID=1
-
-# Check loan status
-make check-loan LOAN_ID=1
-```
-
----
-
 ## 💡 Usage Examples
 
 ### Creating a Loan Request
@@ -618,18 +495,7 @@ console.log("Total loans:", stats.totalLoans.toString());
 | **Integer Overflow**      | Solidity 0.8+ built-in protection | ✅ Protected   |
 | **External Calls**        | SafeERC20 for token interactions  | ✅ Implemented |
 
-### Audit Checklist
 
-- ✅ No recursive calls possible
-- ✅ All external calls protected
-- ✅ State changes before external calls
-- ✅ Proper access control implementation
-- ✅ Input validation on all functions
-- ✅ Emergency pause functionality
-- ✅ No division by zero possibilities
-- ✅ Proper event emission
-- ✅ No unused variables or functions
-- ✅ Gas optimization implemented
 
 ### Security Best Practices
 
