@@ -33,7 +33,7 @@ const blockdagTestnet = {
 
 // Create wagmi adapter with BlockDAG Testnet
 const wagmiAdapter = new WagmiAdapter({
-  networks: [mainnet, blockdagTestnet],
+  networks: [blockdagTestnet],
   projectId,
   ssr: true, // Enable if using SSR
 });
@@ -41,7 +41,7 @@ const wagmiAdapter = new WagmiAdapter({
 // Create modal with BlockDAG Testnet
 createAppKit({
   adapters: [wagmiAdapter],
-  networks: [mainnet, blockdagTestnet],
+  networks: [blockdagTestnet],
   projectId,
   metadata: {
     name: "FlashDAG",
