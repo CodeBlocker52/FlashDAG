@@ -149,7 +149,6 @@ const BorrowingDashboard: React.FC = () => {
 
   const {
     balance: bdagBalance,
-    balanceWei,
     approve,
     isPending: tokenPending,
     isConfirming: tokenConfirming,
@@ -158,14 +157,14 @@ const BorrowingDashboard: React.FC = () => {
   } = useBDAGToken();
 
   const borrowerStatus = useBorrowerStatus();
-  console.log("borrowerStatus", borrowerStatus);
+
   const collateralInfo: UserCollateralInfo = useUserCollateralInfo();
 
   // Form states
   const [loanAmount, setLoanAmount] = useState<string>("");
   const [collateralAmount, setCollateralAmount] = useState<string>("");
   const [collateralType, setCollateralType] = useState<string>("BDAG");
-  const [duration, setDuration] = useState<string>("30");
+  const [duration, setDuration] = useState<string>("");
   const [interestRate, setInterestRate] = useState<string>("");
   const [loanPurpose, setLoanPurpose] = useState<string>("");
   const [status, setStatus] = useState<string>("");
@@ -345,7 +344,7 @@ const BorrowingDashboard: React.FC = () => {
   const resetForm = () => {
     setLoanAmount("");
     setCollateralAmount("");
-    setDuration("30");
+    setDuration("");
     setInterestRate("");
     setLoanPurpose("");
     setStatus("");
@@ -361,9 +360,6 @@ const BorrowingDashboard: React.FC = () => {
     if (ratioNum >= 150) return { score: "Fair", color: "text-yellow-400" };
     return { score: "Risky", color: "text-red-400" };
   };
-
-  console.log('nativeBalance', nativeBalance?.value)
-  console.log("collateralAmt", collateralAmount ? BigInt(parseFloat(collateralAmount) * 10 ** 18) : 0n);
 
   const handleApproval = async (): Promise<void> => {
     if (!collateralAmount) {
@@ -674,28 +670,26 @@ const BorrowingDashboard: React.FC = () => {
           </div>
 
           {/* User Status Alerts */}
-          {borrowerStatus &&
-            !borrowerStatus.canBorrow && (
-              <Alert variant="warning" className="mb-4">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  {borrowerStatus.isBlacklisted
-                    ? "Your account is currently restricted from borrowing."
-                    : `You have reached the maximum of ${PLATFORM_CONSTANTS.MAX_LOANS_PER_USER} active loans.`}
-                </div>
-              </Alert>
-            )}
+          {borrowerStatus && !borrowerStatus.canBorrow && (
+            <Alert variant="warning" className="mb-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                {borrowerStatus.isBlacklisted
+                  ? "Your account is currently restricted from borrowing."
+                  : `You have reached the maximum of ${PLATFORM_CONSTANTS.MAX_LOANS_PER_USER} active loans.`}
+              </div>
+            </Alert>
+          )}
 
-          {borrowerStatus &&
-            borrowerStatus.creditScore < 600 && (
-              <Alert variant="info" className="mb-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-5 h-5" />
-                  Your credit score is below 600. Consider improving your
-                  repayment history for better rates.
-                </div>
-              </Alert>
-            )}
+          {borrowerStatus && borrowerStatus.creditScore < 600 && (
+            <Alert variant="info" className="mb-4">
+              <div className="flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                Your credit score is below 600. Consider improving your
+                repayment history for better rates.
+              </div>
+            </Alert>
+          )}
         </div>
 
         {/* Tab Navigation */}
@@ -822,6 +816,7 @@ const BorrowingDashboard: React.FC = () => {
                         value={duration}
                         onChange={(e) => setDuration(e.target.value)}
                       >
+                        <option value="">Select Duration</option>
                         <option value="7">7 Days</option>
                         <option value="14">14 Days</option>
                         <option value="30">30 Days</option>
@@ -836,7 +831,6 @@ const BorrowingDashboard: React.FC = () => {
                       )}
                     </div>
 
-                    
                     {/* Collateral Amount */}
                     <div>
                       <label className="block text-white mb-3 font-medium">
@@ -860,10 +854,17 @@ const BorrowingDashboard: React.FC = () => {
                           <option value="BDAG">BDAG</option>
                         </select>
                       </div>
-                      {calculateCollateralRatio(loanAmount, collateralAmount) && (
+                      {calculateCollateralRatio(
+                        loanAmount,
+                        collateralAmount
+                      ) && (
                         <p className="text-gray-400 text-sm mt-2">
                           Collateral ratio:{" "}
-                          {calculateCollateralRatio(loanAmount, collateralAmount)}%
+                          {calculateCollateralRatio(
+                            loanAmount,
+                            collateralAmount
+                          )}
+                          %
                           {getHealthScore() && (
                             <span className={`ml-2 ${getHealthScore()?.color}`}>
                               ({getHealthScore()?.score})
@@ -905,11 +906,19 @@ const BorrowingDashboard: React.FC = () => {
                       >
                         <option value="">Select purpose...</option>
                         <option value="DeFi Farming">DeFi Farming</option>
-                        <option value="Arbitrage Trading">Arbitrage Trading</option>
-                        <option value="Liquidity Mining">Liquidity Mining</option>
+                        <option value="Arbitrage Trading">
+                          Arbitrage Trading
+                        </option>
+                        <option value="Liquidity Mining">
+                          Liquidity Mining
+                        </option>
                         <option value="NFT Purchase">NFT Purchase</option>
-                        <option value="Portfolio Leverage">Portfolio Leverage</option>
-                        <option value="Short-term Liquidity">Short-term Liquidity</option>
+                        <option value="Portfolio Leverage">
+                          Portfolio Leverage
+                        </option>
+                        <option value="Short-term Liquidity">
+                          Short-term Liquidity
+                        </option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
@@ -932,14 +941,24 @@ const BorrowingDashboard: React.FC = () => {
                         <div>
                           <span className="text-gray-400">Interest Cost:</span>
                           <div className="text-orange-400 font-semibold text-lg">
-                            {calculateLoanReturn(loanAmount, parseFloat(interestRate), parseInt(duration)).toFixed(4)}{" "}
+                            {calculateLoanReturn(
+                              loanAmount,
+                              parseFloat(interestRate),
+                              parseInt(duration)
+                            ).toFixed(4)}{" "}
                             BDAG
                           </div>
                         </div>
                         <div>
-                          <span className="text-gray-400">Total Repayment:</span>
+                          <span className="text-gray-400">
+                            Total Repayment:
+                          </span>
                           <div className="text-green-400 font-semibold text-lg">
-                            {calculateTotalRepayment(loanAmount, parseFloat(interestRate), parseInt(duration))}{" "}
+                            {calculateTotalRepayment(
+                              loanAmount,
+                              parseFloat(interestRate),
+                              parseInt(duration)
+                            )}{" "}
                             BDAG
                           </div>
                         </div>
@@ -965,7 +984,10 @@ const BorrowingDashboard: React.FC = () => {
                       (borrowerStatus && !borrowerStatus.canBorrow)
                     }
                   >
-                    {isPending || isConfirming || tokenPending || tokenConfirming ? (
+                    {isPending ||
+                    isConfirming ||
+                    tokenPending ||
+                    tokenConfirming ? (
                       <>
                         <RefreshCw className="w-5 h-5 animate-spin" />
                         {isApprovalStep
@@ -996,15 +1018,18 @@ const BorrowingDashboard: React.FC = () => {
                     </Alert>
                   )}
 
-                  {nativeBalance?.value && (nativeBalance?.value < BigInt(parseFloat(collateralAmount || "0") * 10**18)) && collateralAmount && (
-                    <Alert variant="error" className="mt-4">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5" />
-                        Insufficient BDAG balance for collateral. You have{" "}
-                        {bdagBalance} BDAG, need {collateralAmount} BDAG.
-                      </div>
-                    </Alert>
-                  )}
+                  {nativeBalance?.value &&
+                    nativeBalance?.value <
+                      BigInt(parseFloat(collateralAmount || "0") * 10 ** 18) &&
+                    collateralAmount && (
+                      <Alert variant="error" className="mt-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Insufficient BDAG balance for collateral. You have{" "}
+                          {bdagBalance} BDAG, need {collateralAmount} BDAG.
+                        </div>
+                      </Alert>
+                    )}
                 </CardContent>
               </Card>
             </div>
@@ -1025,31 +1050,46 @@ const BorrowingDashboard: React.FC = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Total Loans:</span>
                         <span className="font-semibold text-white">
-                          {Number(platformStats.totalLoans)}
+                          {platformStats?.totalLoans ? Number(platformStats.totalLoans) : 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Total Borrowed:</span>
                         <span className="font-semibold text-white">
-                          {(Number(platformStats.totalBorrowedAmount) / 10**18).toFixed(2)} BDAG
+                          {platformStats?.totalBorrowedAmount
+                            ? (Number(platformStats.totalBorrowedAmount) / 10 ** 18).toFixed(2)
+                            : "0.00"}{" "}
+                          BDAG
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Total Collateral:</span>
                         <span className="font-semibold text-white">
-                          {(Number(platformStats.totalCollateralLocked) / 10**18).toFixed(2)} BDAG
+                          {platformStats?.totalCollateralLocked
+                            ? (Number(platformStats.totalCollateralLocked) / 10 ** 18).toFixed(2)
+                            : "0.00"}{" "}
+                          BDAG
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Utilization Rate:</span>
                         <span className="font-semibold text-white">
-                          {(Number(platformStats.utilizationRate) / 100).toFixed(1)}%
+                          {platformStats?.utilizationRate
+                            ? (Number(platformStats.utilizationRate) / 100).toFixed(1)
+                            : "0.0"}
+                          %
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-400">Emergency Status:</span>
-                        <span className={`font-semibold ${platformStats.emergencyStatus ? 'text-red-400' : 'text-green-400'}`}>
-                          {platformStats.emergencyStatus ? 'Active' : 'Normal'}
+                        <span
+                          className={`font-semibold ${
+                            platformStats.emergencyStatus
+                              ? "text-red-400"
+                              : "text-green-400"
+                          }`}
+                        >
+                          {platformStats.emergencyStatus ? "Active" : "Normal"}
                         </span>
                       </div>
                     </div>
@@ -1116,13 +1156,25 @@ const BorrowingDashboard: React.FC = () => {
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="border-b border-gray-700">
-                          <th className="p-4 text-left text-gray-400">Loan ID</th>
-                          <th className="p-4 text-left text-gray-400">Amount</th>
-                          <th className="p-4 text-left text-gray-400">Collateral</th>
+                          <th className="p-4 text-left text-gray-400">
+                            Loan ID
+                          </th>
+                          <th className="p-4 text-left text-gray-400">
+                            Amount
+                          </th>
+                          <th className="p-4 text-left text-gray-400">
+                            Collateral
+                          </th>
                           <th className="p-4 text-left text-gray-400">Rate</th>
-                          <th className="p-4 text-left text-gray-400">Duration</th>
-                          <th className="p-4 text-left text-gray-400">Status</th>
-                          <th className="p-4 text-left text-gray-400">Actions</th>
+                          <th className="p-4 text-left text-gray-400">
+                            Duration
+                          </th>
+                          <th className="p-4 text-left text-gray-400">
+                            Status
+                          </th>
+                          <th className="p-4 text-left text-gray-400">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1132,13 +1184,21 @@ const BorrowingDashboard: React.FC = () => {
                             className="border-b border-gray-700 hover:bg-gray-800"
                           >
                             <td className="p-4">#{loan.id}</td>
-                            <td className="p-4">{loan.loanAmount.toFixed(2)} BDAG</td>
-                            <td className="p-4">{loan.collateralAmount.toFixed(2)} BDAG</td>
-                            <td className="p-4">{loan.interestRate.toFixed(1)}%</td>
+                            <td className="p-4">
+                              {loan.loanAmount.toFixed(2)} BDAG
+                            </td>
+                            <td className="p-4">
+                              {loan.collateralAmount.toFixed(2)} BDAG
+                            </td>
+                            <td className="p-4">
+                              {loan.interestRate.toFixed(1)}%
+                            </td>
                             <td className="p-4">{loan.duration} days</td>
                             <td className="p-4">
                               <div
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                  loan.status
+                                )}`}
                               >
                                 {getStatusIcon(loan.status)}
                                 <span>{formatLoanStatus(loan.status)}</span>
@@ -1151,7 +1211,9 @@ const BorrowingDashboard: React.FC = () => {
                                   onClick={() =>
                                     handleRepayment(
                                       loan.id,
-                                      (loan.totalOwed - loan.repaidAmount).toFixed(4).toString()
+                                      (loan.totalOwed - loan.repaidAmount)
+                                        .toFixed(4)
+                                        .toString()
                                     )
                                   }
                                   disabled={isPending || isConfirming}
@@ -1177,7 +1239,9 @@ const BorrowingDashboard: React.FC = () => {
                 ) : (
                   <div className="text-center py-12">
                     <Activity className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400 text-lg">No loan requests found</p>
+                    <p className="text-gray-400 text-lg">
+                      No loan requests found
+                    </p>
                     <p className="text-gray-500 text-sm mt-2">
                       Create your first loan request to get started
                     </p>
@@ -1240,7 +1304,9 @@ const BorrowingDashboard: React.FC = () => {
             {/* Credit Score Breakdown */}
             <Card className="bg-gray-900/50 border border-violet-400/20 lg:col-span-3">
               <CardHeader>
-                <CardTitle className="text-white">Credit Score Breakdown</CardTitle>
+                <CardTitle className="text-white">
+                  Credit Score Breakdown
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -1248,7 +1314,10 @@ const BorrowingDashboard: React.FC = () => {
                     <span className="text-gray-400">Payment History</span>
                     <div className="flex items-center gap-2">
                       <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div className="bg-green-400 h-2 rounded-full" style={{ width: "85%" }}></div>
+                        <div
+                          className="bg-green-400 h-2 rounded-full"
+                          style={{ width: "85%" }}
+                        ></div>
                       </div>
                       <span className="text-green-400 text-sm">85%</span>
                     </div>
@@ -1257,7 +1326,10 @@ const BorrowingDashboard: React.FC = () => {
                     <span className="text-gray-400">Loan Diversity</span>
                     <div className="flex items-center gap-2">
                       <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div className="bg-blue-400 h-2 rounded-full" style={{ width: "60%" }}></div>
+                        <div
+                          className="bg-blue-400 h-2 rounded-full"
+                          style={{ width: "60%" }}
+                        ></div>
                       </div>
                       <span className="text-blue-400 text-sm">60%</span>
                     </div>
@@ -1266,7 +1338,10 @@ const BorrowingDashboard: React.FC = () => {
                     <span className="text-gray-400">Collateral Management</span>
                     <div className="flex items-center gap-2">
                       <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div className="bg-purple-400 h-2 rounded-full" style={{ width: "75%" }}></div>
+                        <div
+                          className="bg-purple-400 h-2 rounded-full"
+                          style={{ width: "75%" }}
+                        ></div>
                       </div>
                       <span className="text-purple-400 text-sm">75%</span>
                     </div>
@@ -1275,7 +1350,10 @@ const BorrowingDashboard: React.FC = () => {
                     <span className="text-gray-400">Platform Activity</span>
                     <div className="flex items-center gap-2">
                       <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "45%" }}></div>
+                        <div
+                          className="bg-yellow-400 h-2 rounded-full"
+                          style={{ width: "45%" }}
+                        ></div>
                       </div>
                       <span className="text-yellow-400 text-sm">45%</span>
                     </div>
@@ -1293,18 +1371,30 @@ const BorrowingDashboard: React.FC = () => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Loans Created</span>
-                    <span className="text-white">{borrowerStatus?.successfulLoans || 0}</span>
+                    <span className="text-white">
+                      {borrowerStatus?.successfulLoans || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Successful Repayments</span>
-                    <span className="text-green-400">{borrowerStatus?.successfulLoans || 0}</span>
+                    <span className="text-green-400">
+                      {borrowerStatus?.successfulLoans || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Default Rate</span>
                     <span className="text-red-400">
-                      {borrowerStatus ? 
-                        ((borrowerStatus.defaultedLoans / Math.max(1, borrowerStatus.successfulLoans + borrowerStatus.defaultedLoans)) * 100).toFixed(1) + '%' 
-                        : '0%'}
+                      {borrowerStatus
+                        ? (
+                            (borrowerStatus.defaultedLoans /
+                              Math.max(
+                                1,
+                                borrowerStatus.successfulLoans +
+                                  borrowerStatus.defaultedLoans
+                              )) *
+                            100
+                          ).toFixed(1) + "%"
+                        : "0%"}
                     </span>
                   </div>
                   <div className="flex justify-between">

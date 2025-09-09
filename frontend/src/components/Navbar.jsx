@@ -13,7 +13,6 @@ const Navbar = () => {
   const { address, isConnected, chain } = useAccount();
   const { disconnect } = useDisconnect();
 
-  console.log('chain', chain)
   // Format address for display
   const formatAddress = (addr) => {
     if (!addr) return '';

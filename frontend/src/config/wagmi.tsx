@@ -1,6 +1,6 @@
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet } from "@reown/appkit/networks";
+import { parseGwei } from "viem/utils";
 
 // Your WalletConnect project ID from https://cloud.reown.com
 const projectId = "f1165190b8b18660f80e79d4383e3e00";
@@ -18,15 +18,17 @@ const blockdagTestnet = {
     default: {
       http: ["https://rpc.primordial.bdagscan.com"],
     },
-    public: {
-      http: ["https://rpc.primordial.bdagscan.com"],
-    },
   },
   blockExplorers: {
     default: {
       name: "BlockDAG Explorer",
-      url: "https://primordial.bdagscan.com", // Replace with actual explorer URL
+      url: "https://primordial.bdagscan.com",
     },
+  },
+  // Add proper fee configuration
+  fees: {
+    defaultPriorityFeePerGas: parseGwei('2'),
+    baseFeeMultiplier: 1.2,
   },
   testnet: true,
 };

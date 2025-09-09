@@ -10,7 +10,7 @@ import Navbar from './components/Navbar.jsx';
 import Home from './pages/Home.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import About from './pages/About.jsx';
-import SupplyDashboard from "./pages/Lending.jsx";
+import SupplyDashboard from "./pages/Lending.tsx";
 import BorrowDashboard from "./pages/Borrowing.tsx";
 import WithdrawDashboard from './pages/withdraw.jsx';
 import RepayDashboard from './pages/repay.jsx';

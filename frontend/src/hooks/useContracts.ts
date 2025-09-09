@@ -2,13 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   useAccount,
-  useBalance,
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContracts,
 } from "wagmi";
-import { parseEther, formatEther } from "viem";
+import { parseEther, formatEther, parseGwei } from "viem";
 import type { Address } from "viem";
 import {
   CONTRACT_ADDRESSES,
@@ -264,7 +263,7 @@ export const useMicroLendingPlatform = () => {
   const userLoans = userData?.[2]?.result as bigint[] | undefined;
   const userLends = userData?.[3]?.result as bigint[] | undefined;
   const isBlacklisted = userData?.[4]?.result as boolean | undefined;
-  console.log("userData", userData);
+
   // Write functions
   const requestLoan = useCallback(
     async (loanRequest: CreateLoanParams) => {
@@ -288,6 +287,16 @@ export const useMicroLendingPlatform = () => {
           throw new Error(ERROR_CODES.InvalidCollateralAmount);
         }
 
+        console.log("args", [
+          {
+            amount: amountWei,
+            interestRate: interestRateBasisPoints,
+            duration: durationSeconds,
+            collateralAmount: collateralWei,
+            purpose: purpose || "General Purpose",
+          },
+        ]);
+
         await writeContract({
           address: CONTRACT_ADDRESSES.MICRO_LENDING_PLATFORM,
           abi: MICRO_LENDING_PLATFORM_ABI,
@@ -301,6 +310,10 @@ export const useMicroLendingPlatform = () => {
               purpose: purpose || "General Purpose",
             },
           ],
+          // Add explicit gas configuration
+          gas: BigInt(300000), // Much lower gas limit
+          gasPrice: parseGwei("20"), // Explicit gas price
+          value: BigInt(0), // Explicitly set value to 0 for non-payable function
         });
       } catch (err) {
         console.error("Error requesting loan:", err);
@@ -512,7 +525,7 @@ export const useBDAGToken = () => {
   const approve = useCallback(
     async (amount: string) => {
       if (!address) throw new Error("Wallet not connected");
-      console.log("amount",parseEther(amount));
+
       try {
         await writeContract({
           address: CONTRACT_ADDRESSES.BDAG_TOKEN,
@@ -612,10 +625,90 @@ export const useLoanDetails = (loanId: number | null) => {
   };
 };
 
+// Custom hook to fetch all loans
+export const useAllLoans = () => {
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const { data: loanCounter } = useReadContract({
+    address: CONTRACT_ADDRESSES.MICRO_LENDING_PLATFORM,
+    abi: MICRO_LENDING_PLATFORM_ABI,
+    functionName: "loanCounter",
+  });
+
+  useEffect(() => {
+    const fetchAllLoans = async () => {
+      if (!loanCounter || loanCounter === 0n) {
+        setLoans([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const loanPromises = [];
+        const count = Number(loanCounter);
+
+        for (let i = 1; i <= count; i++) {
+          loanPromises.push(
+            // In a real implementation, you'd make contract calls here
+            // For now, this is a placeholder structure
+            Promise.resolve({
+              id: i,
+              borrower: `0x${"0".repeat(40)}`,
+              lender: `0x${"0".repeat(40)}`,
+              amount: 0n,
+              interestRate: 0n,
+              duration: 0n,
+              startTime: 0n,
+              collateralAmount: 0n,
+              status: 0,
+              repaidAmount: 0n,
+              isPartiallyRepaid: false,
+              purpose: "Loading...",
+            })
+          );
+        }
+
+        const loanResults = await Promise.all(loanPromises);
+
+        // Transform contract data to UI format
+        const transformedLoans = loanResults.map((loan) => ({
+          id: loan.id,
+          borrower: loan.borrower,
+          lender: loan.lender,
+          loanAmount: parseFloat(formatEther(loan.amount || 0n)),
+          collateralAmount: parseFloat(
+            formatEther(loan.collateralAmount || 0n)
+          ),
+          collateralType: "BDAG",
+          duration: Number(loan.duration || 0n),
+          interestRate: Number(loan.interestRate || 0n) / 100, // Convert basis points to percentage
+          timestamp: new Date().toISOString().split("T")[0], // Placeholder
+          purpose: loan.purpose || "General Purpose",
+          status: Number(loan.status || 0),
+          collateralRatio: 160, // Calculate from actual data
+          repaidAmount: parseFloat(formatEther(loan.repaidAmount || 0n)),
+          isPartiallyRepaid: loan.isPartiallyRepaid || false,
+        }));
+
+        setLoans(transformedLoans);
+      } catch (error) {
+        console.error("Error fetching loans:", error);
+        setLoans([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllLoans();
+  }, [loanCounter]);
+
+  return { loans, loading, refetch: () => window.location.reload() };
+};
+
 // Custom hook to check borrower status
 export const useBorrowerStatus = () => {
-  const { address } = useAccount();
-  // const { data: balance } = useBalance({ address });
+  // const { address } = useAccount();
   const { borrowerInfo, isBlacklisted } = useMicroLendingPlatform();
   const { balance } = useBDAGToken();
 
